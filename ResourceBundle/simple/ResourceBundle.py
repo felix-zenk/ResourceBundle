@@ -1,68 +1,51 @@
-import os
+from os.path import exists, isfile
+from typing import List
 
-from typing import List, KeysView
-
-from ..util.Locale import Locale
+from ..util.Locale import Locale, ROOT
 from ..util.readers import SimpleReader
 from ..exceptions import NotInResourceBundleError, MissingResourceBundleError
 
 
 class ResourceBundle:
-    """
-    Class that handles access to a resource across different locales
-    """
 
-    cached_bundles = {}
+    _cached_bundles = {}
 
-    def __init__(self, path: str = None, root: str = None):
+    def __init__(self, path: str = None, root: str = "."):
         """
-        Initializes a new ResourceBundle instance and loads the given resource file
+        Class that handles access to a resource across different locales.
         :param path: The path to the resource file
         :type path: str
         :param root: The resources root directory path
         :type root: str
         """
+        self._root = "."  # Initialize root
         self._parent = None
-        self._name = path
         self._lookup = {}
         self._reader = SimpleReader()
-        if root is None:
-            self._root = "."
-        else:
-            self.set_resources_root(root)
+        self.set_resources_root(root)  # Set correct root
         if path is not None:
+            self._name = path
             self._load(path)
+        else:
+            self._name = "INVALID"
 
     def _load(self, path: str) -> None:
         """
-        Loads keys and values into this ResourceBundle instance
+        Loads keys and values into this ResourceBundle instance.
         :param path: The path to the resource file
         :type path: str
         :return: Nothing
         :rtype: None
         """
-        self._reader.load(self._root + "/" + path)
+        if self._root not in path:
+            self._reader.load(self._root + "/" + path)
+        else:
+            self._reader.load(path)
         self._lookup = self._reader.get()
-
-    def get(self, key: str) -> str:
-        """
-        Gets an object from the ResourceBundle
-        :param key: The key of the desired object
-        :type key: str
-        :return: The object
-        :rtype: str
-        """
-        obj = self._handle_get_object(key)
-        if obj is None:
-            if self._parent is not None:
-                obj = self._parent.get(key)
-            if obj is None:
-                raise NotInResourceBundleError("Can't find resource for bundle " + self.get_name() + ", key " + key)
-        return obj
 
     def _handle_get_object(self, key) -> object:
         """
-        Searches the given key in this ResourceBundle and returns its value if found, else None
+        Searches the given key in this ResourceBundle and returns its value if found, else None.
         :param key:
         :type key:
         :return:
@@ -73,34 +56,9 @@ class ResourceBundle:
         except KeyError:
             return None
 
-    def set_name(self, name):
+    def _set_parent(self, parent) -> None:
         """
-        Setter for the name of this ResourceBundle
-        :param name: The new name
-        :type name: str
-        :return: Nothing
-        :rtype: None
-        """
-        self._name = name
-
-    def get_name(self) -> str:
-        """
-        Getter for the name of this ResourceBundle
-        :return: The name
-        :rtype: str
-        """
-        return self._name
-
-    def get_keys(self) -> KeysView:
-        """
-        Gets the currently loaded keys
-        :return: The keys
-        :rtype: List[str]
-        """
-        return self._lookup.keys()
-
-    def set_parent(self, parent) -> None:
-        """Sets the parent for this bundle
+        Sets the parent for this bundle.
         :param parent: The new parent
         :type parent: ResourceBundle
         :return: Nothing
@@ -110,7 +68,7 @@ class ResourceBundle:
 
     def set_resources_root(self, path: str) -> None:
         """
-        Sets the resources root
+        Sets the resources root.
         :param path: The new path
         :type path: str
         :return: Nothing
@@ -119,9 +77,9 @@ class ResourceBundle:
         path = path.replace("\\", "/")
         if path.endswith("/"):
             path = path[:-1]
-        if not os.path.exists(path):
+        if not exists(path):
             raise FileNotFoundError("'" + path + "' could not be found")
-        if os.path.isfile(path):
+        if isfile(path):
             raise NotADirectoryError("'" + path + "' is not a directory")
         self._root = path
         if self._parent is not None:
@@ -129,7 +87,7 @@ class ResourceBundle:
 
     def generate_parent_chain(self, base_name: str, locale_: Locale, root: str = None) -> None:
         """
-        Generates the parent chain for this ResourceBundle
+        Generates the parent chain for this ResourceBundle.
         :param base_name:
         :type base_name:
         :param locale_:
@@ -140,20 +98,89 @@ class ResourceBundle:
         :rtype: None
         """
         top_locale = locale_.get_top_locale()
-        self.cached_bundles[_to_bundle_name(base_name, locale_)] = self
+        self._cached_bundles[_to_bundle_name(base_name, locale_)] = self
         if top_locale is None:
             return
         else:
             try:
-                bundle = self.cached_bundles[_to_bundle_name(base_name, top_locale)]
+                bundle = self._cached_bundles[_to_bundle_name(base_name, top_locale)]
+                bundle.set_resources_root(root)
             except KeyError:
-                bundle = get_bundle(base_name, top_locale, root=root)  # TODO Try set parent bundle / maybe skip -> parent.parent /maybe is most top bundle -> None
-            self.set_parent(bundle)
+                bundle = get_bundle(base_name, top_locale, root=root)
+            self._set_parent(bundle)
+
+    def __str__(self):
+        return "<{} - '{}'>".format(self.__class__.__name__, self._name)
+
+    def get(self, key: str) -> str:
+        """
+        Gets an object from the ResourceBundle.
+        :param key: The key of the desired object
+        :type key: str
+        :return: The object
+        :rtype: str
+        """
+        obj = self._handle_get_object(key)
+        if obj is None:
+            if self._parent is not None:
+                obj = self._parent.get(key)
+            if obj is None:
+                raise NotInResourceBundleError(self._name, key)
+        return obj
+
+    def get_name(self) -> str:
+        """
+        Getter for the name of this ResourceBundle.
+        :return: The name
+        :rtype: str
+        """
+        return self._name
+
+    def get_keys(self) -> List[str]:
+        """
+        Gets the currently loaded keys.
+        :return: The keys
+        :rtype: List[str]
+        """
+        return list(self._lookup.keys())
+
+    def get_values(self) -> List[str]:
+        """
+        Gets the currently loaded values.
+        :return: The values
+        :rtype: List[str]
+        """
+        return list(self._lookup.values())
+
+    def get_all_keys(self) -> List[str]:
+        """
+        Gets all keys from this ResourceBundle and its parents.
+        Due to casting to set the order of the keys can vary.
+        :return: The keys
+        :rtype: List[str]
+        """
+        if self._parent is not None:
+            return list(set(self.get_keys() + self._parent.get_all_keys()))
+        else:
+            return self.get_keys()
+
+    def get_all_values(self) -> List[str]:
+        """
+        Gets all values from this ResourceBundle and its parents.
+        Due to casting to set the order of the values can vary.
+        Usage of this method is not encouraged.
+        :return: The keys
+        :rtype: List[str]
+        """
+        if self._parent is not None:
+            return list(set(self.get_values() + self._parent.get_all_values()))
+        else:
+            return self.get_values()
 
 
-def get_bundle(base_name: str, locale_: Locale = None, root: str = None) -> ResourceBundle:
+def get_bundle(base_name: str, locale_: Locale = None, root: str = ".") -> ResourceBundle:
     """
-    Gets a specific ResourceBundle
+    Gets a specific ResourceBundle.
     :param base_name: The name of the ResourceBundle
     :type base_name: str
     :param locale_: The locale
@@ -163,12 +190,12 @@ def get_bundle(base_name: str, locale_: Locale = None, root: str = None) -> Reso
     :return: The ResourceBundle
     :rtype: ResourceBundle
     """
-    return _new_bundle(base_name, locale_, "properties", root)
+    return _new_bundle(base_name, locale_, "properties", root=root)
 
 
 def _to_resource_name(bundle_name: str, format_: str) -> str:
     """
-    Converts the ResourceBundle name into the corresponding resource path
+    Converts the ResourceBundle name into the corresponding resource path.
     :param bundle_name: The specific name of the ResourceBundle
     :type bundle_name: str
     :param format_: The format of this ResourceBundle (file extension)
@@ -181,7 +208,7 @@ def _to_resource_name(bundle_name: str, format_: str) -> str:
 
 def _to_bundle_name(base_name: str, locale_: Locale) -> str:
     """
-    Generates the bundle name for a ResourceBundle
+    Generates the bundle name for a ResourceBundle.
     :param base_name: The base name of the ResourceBundle
     :type base_name: str
     :param locale_: The locale to use for generating the name
@@ -189,12 +216,12 @@ def _to_bundle_name(base_name: str, locale_: Locale) -> str:
     :return: The name of the ResourceBundle
     :rtype: str
     """
-    return base_name + locale_.get_delim() + locale_.to_string() if locale_.to_string() != "" else base_name
+    return base_name + locale_.get_delim() + locale_.to_string() if locale_ != ROOT else base_name
 
 
-def _new_bundle(base_name: str, locale_: Locale, format_: str, root: str = None) -> ResourceBundle:
+def _new_bundle(base_name: str, locale_: Locale, format_: str, root: str = ".") -> ResourceBundle:
     """
-    Creates a new ResourceBundle
+    Creates a new ResourceBundle.
     :param base_name: The base name of this ResourceBundle
     :type base_name: str
     :param locale_: The locale for this ResourceBundle
@@ -206,6 +233,12 @@ def _new_bundle(base_name: str, locale_: Locale, format_: str, root: str = None)
     :return: The new ResourceBundle
     :rtype: ResourceBundle
     """
-    bundle = ResourceBundle(_to_resource_name(_to_bundle_name(base_name, locale_), format_), root)
-    bundle.generate_parent_chain(base_name, locale_, root)
-    return bundle
+    try:
+        bundle = ResourceBundle(_to_resource_name(_to_bundle_name(base_name, locale_), format_), root=root)
+        bundle.generate_parent_chain(base_name, locale_, root=root)
+        return bundle
+    except FileNotFoundError:
+        if locale_ != ROOT:
+            return _new_bundle(base_name, locale_.get_top_locale(), format_, root=root)
+        else:
+            raise MissingResourceBundleError(_to_bundle_name(base_name, locale_))

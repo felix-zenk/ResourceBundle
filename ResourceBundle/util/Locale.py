@@ -12,13 +12,15 @@ class Locale:
         :type variant: str
         :param use_locale_module: Whether or not to ignore the other params
                                   and use the locale defined through the locale module.
-                                  Use locale.setlocale(locale.LC_ALL, "language")
-                                  or locale.setlocale(locale.LC_MESSAGES, "language") to set the used locale
+                                  Use locale.setlocale(locale.LC_ALL, "language") to set the used locale
         :type use_locale_module: bool
         """
         if use_locale_module:
-            from locale import getlocale, LC_MESSAGES
-            params = getlocale(LC_MESSAGES)[0].split("_")
+            import locale
+            params = locale.getlocale()[0].split("_")
+            for param in params[:]:
+                if len(param) != 2:  # only support 2 char codes
+                    params = []  # module is unusable
             if len(params) > 1:
                 self.__init__(language=params[0], country=params[1])
                 return
@@ -27,7 +29,7 @@ class Locale:
                 return
             else:
                 from warnings import warn
-                warn("locale module could not be used! Used locale: "+str(getlocale(LC_MESSAGES)))
+                warn("locale module could not be used! Used locale: "+str(locale.getlocale()))
         self._delim = "_"
         if language is None or language == "":
             self._language = ""

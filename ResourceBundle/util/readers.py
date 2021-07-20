@@ -1,12 +1,21 @@
-import os
-
-
 class SimpleReader:
+
     def __init__(self):
+        """
+        Class for IO interaction, loads key-value pairs from an input file.
+        """
         self._lookup = {}
 
-    def load(self, file_path):
-        with open(file_path) as f:
+    def load(self, file_path: str) -> None:
+        """
+        Loads key-value pairs from a file and ignores empty lines
+        and commented lines indicated through # at the start of a line.
+        :param file_path: The file path
+        :type file_path: str
+        :return: Nothing
+        :rtype: None
+        """
+        with open(file_path, encoding="utf-8") as f:
             lines = f.readlines()
         for line in lines:
             if not (line.strip().startswith('#') or line.strip() == ""):
@@ -22,5 +31,10 @@ class SimpleReader:
                 else:
                     raise LookupError("Duplicate key '" + key + "' in file '" + file_path + "'")
 
-    def get(self):
+    def get(self) -> dict:
+        """
+        Getter for the dict loaded by load()
+        :return: The dictionary of all key-value pairs from the loaded file
+        :rtype: dict
+        """
         return self._lookup

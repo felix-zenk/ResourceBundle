@@ -11,6 +11,7 @@ def write_to_file(filename_without_extension, data):
 
 def generate_bundle(name: str) -> None:
     write_to_file(name, "# This is a comment\n" +
+                  "replace_key=This is the {second_key} and this is a custom value: {}\n" +
                   "this_is_a_key=This is its value\n" +
                   "second_key=second value\n" +
                   "key_only_in_root=And nowhere else\n")
@@ -24,6 +25,10 @@ def demo(bundle_: ResourceBundle, key: str):
     print("Key: {:<20} - Value: {}".format(key, bundle_.get(key)))
 
 
+def demo_format(bundle_, key):
+    print("Key: {:<20} - Value: {}".format(key, bundle_.get_formatted(key, "Custom stuff")))
+
+
 if __name__ == '__main__':
     # Initialization
     generate_bundle("Strings")
@@ -34,18 +39,21 @@ if __name__ == '__main__':
     demo(bundle, "this_is_a_key")
     demo(bundle, "second_key")
     demo(bundle, "key_only_in_root")
+    demo_format(bundle, "replace_key")
 
     bundle = get_bundle("Strings", Locale(language="fr"))
     print("\nCurrent bundle: " + bundle.get_name())
     demo(bundle, "this_is_a_key")
     demo(bundle, "second_key")
     demo(bundle, "key_only_in_root")
+    demo_format(bundle, "replace_key")
 
     bundle = get_bundle("Strings", Locale(language="de", country="de"))
     print("\nCurrent bundle: " + bundle.get_name())
     demo(bundle, "this_is_a_key")
     demo(bundle, "second_key")
     demo(bundle, "key_only_in_root")
+    demo_format(bundle, "replace_key")
 
     locale.setlocale(locale.LC_ALL, "it")
     print("\nTrying to use your locale: "+str(locale.getlocale()))

@@ -6,7 +6,7 @@ It is inspired by javas ResourceBundle and accepts the same format as a java Pro
 ---
 ### Installing
 
-The ResourceBundle module can be downloaded from PyPI:
+The ResourceBundle module can be downloaded from [PyPI](https://pypi.org/project/ResourceBundle):
 
 ```bash
 $  pip install ResourceBundle

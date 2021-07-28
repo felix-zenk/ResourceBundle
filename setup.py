@@ -18,7 +18,7 @@ setuptools.setup(
     url=url,
     project_urls={
         "Bug Reports": url+"/issues/new?labels=bug&template=bug_report.md&title=%5BBUG%5D%3A+",
-        "Source": url,
+        "Source": url
     },
     packages=setuptools.find_packages(),
     classifiers=[

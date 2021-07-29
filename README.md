@@ -1,7 +1,7 @@
 # ResourceBundle
 
 ResourceBundle is a module that manages resource handling where different resources are needed depending on the current locale.
-It is inspired by javas ResourceBundle and accepts the same format as a java PropertyResourceBundle.
+It is inspired by javas ResourceBundle and accepts a similar format as a java PropertyResourceBundle.
 
 ---
 ### Installing

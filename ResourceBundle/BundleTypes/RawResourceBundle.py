@@ -2,7 +2,6 @@ from typing import List
 from os.path import exists, isfile
 
 from ..util.Locale import Locale, ROOT
-from ..util.readers import SimpleReader
 from ..exceptions import NotInResourceBundleError, MissingResourceBundleError
 
 
@@ -10,11 +9,19 @@ class RawResourceBundle:
     _cached_bundles = {}
 
     def __init__(self, path: str = None, root: str = "."):
+        """
+        Class that handles access to a resource across different locales.
+        :param path: The path to the resource file
+        :type path: str
+        :param root: The resources root directory path
+        :type root: str
+        """
         self._root = "."  # Initialize root
         self._parent = None
         self._lookup = {}
         self._reader = None
         self.set_resources_root(root)  # Set correct root
+        self._name = "INVALID" if path is None else path
 
     def _load(self, path: str) -> None:
         """

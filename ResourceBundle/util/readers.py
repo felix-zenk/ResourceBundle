@@ -42,9 +42,20 @@ class SimpleReader:
 
 class ListReader(SimpleReader):
     def __init__(self):
+        """
+        Class for IO interaction, loads lists from an input file.
+        """
         super(ListReader, self).__init__()
 
     def load(self, file_path: str) -> None:
+        """
+        Loads lists from a file and ignores empty lines
+        and commented lines indicated through # at the start of a line.
+        :param file_path: The file path
+        :type file_path: str
+        :return: Nothing
+        :rtype: None
+        """
         with open(file_path, encoding="utf-8") as f:
             lines = f.readlines()
         for line in lines:

@@ -5,6 +5,13 @@ from util.readers import ListReader
 
 class ListResourceBundle(RawResourceBundle):
     def __init__(self, path: str = None, root: str = "."):
+        """
+        Class that handles access to a resource across different locales.
+        :param path: The path to the resource file
+        :type path: str
+        :param root: The resources root directory path
+        :type root: str
+        """
         super(ListResourceBundle, self).__init__(path, root)
         self._reader = ListReader()
         if path is not None:

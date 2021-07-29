@@ -1,4 +1,5 @@
 import setuptools
+import re
 from ResourceBundle import __version__, __author__
 
 with open("README.md", "r") as fh:
@@ -14,7 +15,7 @@ setuptools.setup(
     name="ResourceBundle",
     version=__version__,
     author=__author__.split("<")[0].strip(),
-    author_email=__author__.split("<")[1].strip()[:-1],
+    author_email=re.search(r"([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,})", __author__).group(1),
     description="ResourceBundle is a module that manages resource handling where different resources are needed " +
                 "depending on the current locale",
     long_description=long_description,

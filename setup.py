@@ -3,6 +3,10 @@ from ResourceBundle import __version__, __author__
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
+    long_description = long_description.replace("[![PyPI version](https://img.shields.io/badge/pypi-v1.0.2-yellow)]("
+                                                "https://pypi.org/project/ResourceBundle)", "")  # Don't display on PyPI
+    long_description = long_description.replace("├", "|").replace("└", "|").replace("─", "-")  # PyPI compatibility
+
 
 url = "https://github.com/felix-zenk/ResourceBundle"
 

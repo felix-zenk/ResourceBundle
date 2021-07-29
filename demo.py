@@ -1,6 +1,6 @@
 import locale
 
-from ResourceBundle import get_bundle, ResourceBundle
+from ResourceBundle import get_bundle, ResourceBundle, get_list_bundle
 from ResourceBundle.util.Locale import Locale, ROOT
 
 
@@ -29,7 +29,7 @@ def demo_format(bundle_, key):
     print("Key: {:<20} - Value: {}".format(key, bundle_.get_formatted(key, "Custom stuff")))
 
 
-if __name__ == '__main__':
+def main():
     # Initialization
     generate_bundle("Strings")
 
@@ -56,10 +56,22 @@ if __name__ == '__main__':
     demo_format(bundle, "replace_key")
 
     locale.setlocale(locale.LC_ALL, "it")
-    print("\nTrying to use your locale: "+str(locale.getlocale()))
+    print("\nTrying to use your locale: " + str(locale.getlocale()))
     bundle = get_bundle("Strings", Locale(use_locale_module=True))
     print(("Current bundle: " + bundle.get_name()) if bundle.get_name() != "Strings.properties"
-          else "Your Locale is not in the ResourceBundle! Fallback on: " + bundle.get_name())
+          else "Your Locale is not in the BasicResourceBundle! Fallback on: " + bundle.get_name())
     demo(bundle, "this_is_a_key")
     demo(bundle, "second_key")
     demo(bundle, "key_only_in_root")
+
+
+def main_list():
+    print("\n\nList bundles also exist!")
+    write_to_file("Lists", "key=[This is a value, and this too, great!]")
+    bundle = get_list_bundle("Lists", ROOT)
+    demo(bundle, "key")
+
+
+if __name__ == '__main__':
+    main()
+    main_list()

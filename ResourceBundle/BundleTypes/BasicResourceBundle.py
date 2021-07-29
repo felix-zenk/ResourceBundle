@@ -1,5 +1,6 @@
 import re
 
+from ..util.readers import SimpleReader
 from ..util.Locale import Locale
 from .RawResourceBundle import RawResourceBundle, _new_bundle
 
@@ -16,6 +17,12 @@ class BasicResourceBundle(RawResourceBundle):
         :type root: str
         """
         super(BasicResourceBundle, self).__init__(path, root)
+        self._reader = SimpleReader()
+        if path is not None:
+            self._name = path
+            self._load(path)
+        else:
+            self._name = "INVALID"
 
     def autoformat(self, string: str, *replacements) -> str:
         """

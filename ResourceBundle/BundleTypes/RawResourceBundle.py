@@ -13,13 +13,8 @@ class RawResourceBundle:
         self._root = "."  # Initialize root
         self._parent = None
         self._lookup = {}
-        self._reader = SimpleReader()
+        self._reader = None
         self.set_resources_root(root)  # Set correct root
-        if path is not None:
-            self._name = path
-            self._load(path)
-        else:
-            self._name = "INVALID"
 
     def _load(self, path: str) -> None:
         """

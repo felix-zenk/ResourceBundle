@@ -113,31 +113,6 @@ class ResourceBundle:
     def __str__(self):
         return "<{} - '{}'>".format(self.__class__.__name__, self._name)
 
-    def format(self, string: str, *replacements) -> str:
-        """
-        Replaces {} with replacements.
-        If fewer replacements than brackets in the string get supplied the corresponding brackets will not be replaced!
-        If more replacements than brackets in the string get supplied the remaining replacements will be ignored.
-        :param string: The string that will be formatted
-        :type string: str
-        :param replacements: All the replacements for every {}
-        :type replacements: *args: str
-        :return: The formatted string
-        :rtype: str
-        """
-        if type(replacements[0]) is list:
-            replacements = replacements[0]
-        elif type(replacements[0]) is tuple:
-            replacements = [elem for elem in replacements[0]]
-        partial_strings = string.split("{}")
-        resulting_string = ""
-        for i in range(len(partial_strings) - 1):
-            try:
-                resulting_string += partial_strings[i] + replacements[i]
-            except IndexError:
-                resulting_string += partial_strings[i] + "{}"  # No replacement left for this bracket
-        return resulting_string + partial_strings[-1]
-
     def autoformat(self, string: str, *replacements) -> str:
         """
         Replaces {} like python f-String
@@ -156,9 +131,9 @@ class ResourceBundle:
         replacements_auto_searched = re.findall(r"{([.\w\d]+)}", string)
         if replacements_needed is not None and len(replacements_needed) > len(replacements):
             return None  # Too few params
-        result = self.format(string, replacements)
+        result = replace(string, replacements)
         values = [self.get(key) for key in replacements_auto_searched]
-        return self.format(re.sub(r"{[.\w\d]+}", "{}", result), values)
+        return replace(re.sub(r"{[.\w\d]+}", "{}", result), values)
 
     def get(self, key: str) -> str:
         """
@@ -307,3 +282,29 @@ def _new_bundle(base_name: str, locale_: Locale, format_: str, root: str = ".") 
             return _new_bundle(base_name, locale_.get_top_locale(), format_, root=root)
         else:
             raise MissingResourceBundleError(_to_bundle_name(base_name, locale_))
+
+
+def replace(string: str, *replacements) -> str:
+    """
+    Replaces {} with replacements.
+    If fewer replacements than brackets in the string get supplied the corresponding brackets will not be replaced!
+    If more replacements than brackets in the string get supplied the remaining replacements will be ignored.
+    :param string: The string that will be formatted
+    :type string: str
+    :param replacements: All the replacements for every {}
+    :type replacements: *args: str
+    :return: The formatted string
+    :rtype: str
+    """
+    if type(replacements[0]) is list:
+        replacements = replacements[0]
+    elif type(replacements[0]) is tuple:
+        replacements = [elem for elem in replacements[0]]
+    partial_strings = string.split("{}")
+    resulting_string = ""
+    for i in range(len(partial_strings) - 1):
+        try:
+            resulting_string += partial_strings[i] + replacements[i]
+        except IndexError:
+            resulting_string += partial_strings[i] + "{}"  # No replacement left for this bracket
+    return resulting_string + partial_strings[-1]

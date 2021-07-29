@@ -124,7 +124,7 @@ class ResourceBundle:
         :rtype: str
         """
         if string is None:
-            return None
+            raise TypeError("string must not be None")
         if len(replacements) == 1 and type(replacements[0]) is tuple:
             replacements = replacements[0]
         replacements_needed = re.findall(r"{}", string)
@@ -287,8 +287,7 @@ def _new_bundle(base_name: str, locale_: Locale, format_: str, root: str = ".") 
 def replace(string: str, *replacements) -> str:
     """
     Replaces {} with replacements.
-    If fewer replacements than brackets in the string get supplied the corresponding brackets will not be replaced!
-    If more replacements than brackets in the string get supplied the remaining replacements will be ignored.
+    len(replacements) must match the count of "{}" in the string
     :param string: The string that will be formatted
     :type string: str
     :param replacements: All the replacements for every {}
@@ -296,15 +295,20 @@ def replace(string: str, *replacements) -> str:
     :return: The formatted string
     :rtype: str
     """
+    if string is None:
+        raise TypeError("string must not be None")
     if type(replacements[0]) is list:
         replacements = replacements[0]
     elif type(replacements[0]) is tuple:
         replacements = [elem for elem in replacements[0]]
     partial_strings = string.split("{}")
+    # Check for matching count
+    if len(partial_strings) - 1 != len(replacements):
+        raise TypeError("Argument count does not match! " +
+                        str(len(partial_strings) - 1) +
+                        "replacements are needed for the string \"" + string + "\", but " +
+                        str(len(replacements)) + " were provided.")
     resulting_string = ""
     for i in range(len(partial_strings) - 1):
-        try:
-            resulting_string += partial_strings[i] + replacements[i]
-        except IndexError:
-            resulting_string += partial_strings[i] + "{}"  # No replacement left for this bracket
+        resulting_string += partial_strings[i] + replacements[i]
     return resulting_string + partial_strings[-1]

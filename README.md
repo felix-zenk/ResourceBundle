@@ -62,7 +62,7 @@ Sometimes a key is missing in a file. If the key 'hello' does not exist in a fil
 
 ### Automatic substitution
 
-If you have a key in your ResourceBundle that contains empty curly brackets ``{}`` you can get the key through the ``ResourceBundle.get_formatted()`` method and supply additional arguments.
+If you have a key in your ResourceBundle whose value contains empty curly brackets ``{}`` you can get the key through the ``ResourceBundle.get_formatted()`` method and supply additional arguments.
 The empty brackets will be replaced with the arguments in the order you provide them.
 An exception are curly brackets with another key from the ResourceBundle inside it e.g. ``{another_key}``. That key gets automatically searched for in the ResourceBundle and inserted in those brackets.
 

@@ -50,7 +50,6 @@ For creating a ResourceBundle it is recommended to use the function get_bundle()
 import ResourceBundle as rb
 from ResourceBundle.util.Locale import Locale
 
-
 bundle = rb.get_bundle("Strings", Locale("en"))
 
 # It is now possible to get a resource with the get() method
@@ -80,4 +79,21 @@ bundle.get_formatted("another_key")
 # Returns the object that key refers to,
 # but replaces {key} with the value of key
 # -> "The key is me!"
+```
+
+### ListResourceBundles
+
+ResourceBundles can return values as lists. Just get a ListResourceBundle with:
+
+```python
+import ResourceBundle as rb
+from ResourceBundle.util.Locale import ROOT
+
+bundle = rb.get_list_bundle("Lists", ROOT)
+```
+
+The values of ListResourceBundles must be comma separated lists. Every element gets parsed as a string.
+
+```python
+bundle.get("some_key")  # Returns the value as a list
 ```

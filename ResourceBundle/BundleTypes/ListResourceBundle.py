@@ -1,6 +1,6 @@
 from ..util.Locale import Locale
+from ..util.readers import ListReader
 from .RawResourceBundle import RawResourceBundle, _new_bundle
-from util.readers import ListReader
 
 
 class ListResourceBundle(RawResourceBundle):

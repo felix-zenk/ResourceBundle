@@ -12,7 +12,7 @@ The ResourceBundle module can be downloaded from [PyPI](https://pypi.org/project
 $  pip install ResourceBundle
 ```
 
-[![PyPI version](https://img.shields.io/badge/pypi-v1.0.1-yellow)](https://pypi.org/project/ResourceBundle)
+[![PyPI version](https://img.shields.io/badge/pypi-v1.0.2-yellow)](https://pypi.org/project/ResourceBundle)
 
 ### Usage
 

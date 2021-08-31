@@ -64,7 +64,7 @@ Sometimes a key is missing in a file. If the key 'hello' does not exist in a fil
 
 If you have a key in your ResourceBundle whose value contains empty curly brackets ``{}`` you can get the key through the ``ResourceBundle.get_formatted()`` method and supply additional arguments.
 The empty brackets will be replaced with the arguments in the order you provide them.
-An exception are curly brackets with another key from the ResourceBundle inside it e.g. ``{another_key}``. That key gets automatically searched for in the ResourceBundle and inserted in those brackets.
+An exception are curly brackets with another key from the ResourceBundle inside it e.g. ``{another_key}``. That key gets automatically searched for in the ResourceBundle and inserted in those brackets (This is a recursive search).
 
 ```python
 # key=This is a {}
@@ -92,8 +92,17 @@ from ResourceBundle.util.Locale import ROOT
 bundle = rb.get_list_bundle("Lists", ROOT)
 ```
 
-The values of ListResourceBundles must be comma separated lists. Every element gets parsed as a string.
+The values of ListResourceBundles must be comma separated lists. Every element gets parsed as a string except you provide type identifiers.
 
 ```python
-bundle.get("some_key")  # Returns the value as a list
+# some_key=[This is a value, {s:and this too}, {i:1}, {f:1}, {i:True}, {b:00🐧ff}]
+_list = bundle.get("some_key")  # Returns the value as a list
+
+# is equivalent to
+_list = ["This is a value", "and this too", 1, 1.0, True, b'00🐧ff']
+#  - available type identifiers:
+#    - s: str (default)
+#    - i: int / bool
+#    - f: float
+#    - b: bytes
 ```

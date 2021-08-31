@@ -7,6 +7,7 @@ from .RawResourceBundle import RawResourceBundle, _new_bundle
 
 class BasicResourceBundle(RawResourceBundle):
     _cached_bundles = {}
+    _replacement_pattern = r"{([.\w\d]+)}"
 
     def __init__(self, path: str = None, root: str = "."):
         """
@@ -38,13 +39,15 @@ class BasicResourceBundle(RawResourceBundle):
             raise TypeError("string must not be None")
         if len(replacements) == 1 and type(replacements[0]) is tuple:
             replacements = replacements[0]
+        if len(re.findall(self._replacement_pattern, string)) == 0:
+            return string
         replacements_needed = re.findall(r"{}", string)
-        replacements_auto_searched = re.findall(r"{([.\w\d]+)}", string)
+        replacements_auto_searched = re.findall(self._replacement_pattern, string)
         if replacements_needed is not None and len(replacements_needed) > len(replacements):
             return None  # Too few params
         result = replace(string, replacements)
         values = [self.get(key) for key in replacements_auto_searched]
-        return replace(re.sub(r"{[.\w\d]+}", "{}", result), values)
+        return self.autoformat(replace(re.sub(self._replacement_pattern, "{}", result), values))
 
     def get_formatted(self, key: str, *replacements) -> str:
         """
@@ -62,6 +65,8 @@ class BasicResourceBundle(RawResourceBundle):
             return self.autoformat(self.get(key), replacements)
         else:
             return self.autoformat(self.get(key))
+
+    getf = get_formatted
 
 
 def get_bundle(base_name: str, locale_: Locale = None, root: str = ".") -> RawResourceBundle:
@@ -101,8 +106,8 @@ def replace(string: str, *replacements) -> str:
     if len(partial_strings) - 1 != len(replacements):
         raise TypeError("Argument count does not match! " +
                         str(len(partial_strings) - 1) +
-                        "replacements are needed for the string \"" + string + "\", but " +
-                        str(len(replacements)) + " were provided.")
+                        " replacements are needed for the string \"" + string + "\", but " +
+                        str(len(replacements)) + " were provided: " + str(replacements))
     resulting_string = ""
     for i in range(len(partial_strings) - 1):
         resulting_string += partial_strings[i] + replacements[i]

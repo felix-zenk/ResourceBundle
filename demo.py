@@ -1,7 +1,6 @@
 import locale
 
-from ResourceBundle import get_bundle, ResourceBundle, get_list_bundle
-from ResourceBundle.util.Locale import Locale, ROOT
+from ResourceBundle import get_bundle, ResourceBundle, get_list_bundle, Locale
 
 
 def write_to_file(filename_without_extension, data):
@@ -14,9 +13,16 @@ def generate_bundle(name: str) -> None:
                   "replace_key=This is the {second_key} and this is a custom value: {}\n" +
                   "this_is_a_key=This is its value\n" +
                   "second_key=second value\n" +
-                  "key_only_in_root=And nowhere else\n")
+                  "key_only_in_root=And nowhere else\n" +
+                  "inception1=This {inception2} keys!\n" +
+                  "inception2=sentence is {inception3} multiple\n" +
+                  "inception3=split across\n")
     write_to_file(name + "_de", "this_is_a_key=Das ist sein Wert\n" +
-                  "second_key=Zweiter Wert\n")
+                  "second_key=Zweiter Wert\n" +
+                  "replace_key=Das hier ist '{second_key}' und ein eigener Wert: {}\n" +
+                  "inception1=Dieser {inception2} aufgeteilt!\n" +
+                  "inception2=Satz {inception3} Schlüssel\n" +
+                  "inception3=ist auf mehrere\n")
     write_to_file(name + "_fr", "this_is_a_key=C'est sa valeur\n" +
                   "second_key=deuxième valeur\n")
 
@@ -29,49 +35,44 @@ def demo_format(bundle_, key):
     print("Key: {:<20} - Value: {}".format(key, bundle_.get_formatted(key, "Custom stuff")))
 
 
+def demo_recursive_format(bundle_, key):
+    print("Key: {:<20} - Value: {}".format(key, bundle_.get_formatted(key)))
+
+
 def main():
     # Initialization
     generate_bundle("Strings")
 
     # Demonstration
-    bundle = get_bundle("Strings", ROOT)
-    print("\nCurrent bundle: " + bundle.get_name())
-    demo(bundle, "this_is_a_key")
-    demo(bundle, "second_key")
-    demo(bundle, "key_only_in_root")
-    demo_format(bundle, "replace_key")
+    for bundle in [get_bundle("Strings", Locale.ROOT),
+                   get_bundle("Strings", Locale.Locale(language="fr")),
+                   get_bundle("Strings", Locale.Locale(language="de", country="de"))
+                   ]:
+        print("\nCurrent bundle: " + bundle.get_name())
+        demo(bundle, "this_is_a_key")
+        demo(bundle, "second_key")
+        demo(bundle, "key_only_in_root")
+        demo_format(bundle, "replace_key")
+        demo_recursive_format(bundle, "inception1")
 
-    bundle = get_bundle("Strings", Locale(language="fr"))
-    print("\nCurrent bundle: " + bundle.get_name())
-    demo(bundle, "this_is_a_key")
-    demo(bundle, "second_key")
-    demo(bundle, "key_only_in_root")
-    demo_format(bundle, "replace_key")
-
-    bundle = get_bundle("Strings", Locale(language="de", country="de"))
-    print("\nCurrent bundle: " + bundle.get_name())
-    demo(bundle, "this_is_a_key")
-    demo(bundle, "second_key")
-    demo(bundle, "key_only_in_root")
-    demo_format(bundle, "replace_key")
-
+    # Integration of the locale module
     locale.setlocale(locale.LC_ALL, "it")
-    print("\nTrying to use your locale: " + str(locale.getlocale()))
-    bundle = get_bundle("Strings", Locale(use_locale_module=True))
+    print("\nTrying to use locale: " + str(locale.getlocale()))
+    bundle = get_bundle("Strings", Locale.Locale(use_locale_module=True))
     print(("Current bundle: " + bundle.get_name()) if bundle.get_name() != "Strings.properties"
           else "Your Locale is not in the BasicResourceBundle! Fallback on: " + bundle.get_name())
     demo(bundle, "this_is_a_key")
     demo(bundle, "second_key")
     demo(bundle, "key_only_in_root")
+    demo_format(bundle, "replace_key")
+    demo_recursive_format(bundle, "inception1")
 
-
-def main_list():
+    # List bundles
     print("\n\nList bundles also exist!")
-    write_to_file("Lists", "key=[This is a value, and this too, great!]")
-    bundle = get_list_bundle("Lists", ROOT)
+    write_to_file("Lists", "key=[This is a value, {s:and this too}, {i:1}, {f:1}, {i:True}, {b:00😂ff}]")
+    bundle = get_list_bundle("Lists", Locale.ROOT)
     demo(bundle, "key")
 
 
 if __name__ == '__main__':
     main()
-    main_list()

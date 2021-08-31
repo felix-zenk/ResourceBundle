@@ -1,3 +1,7 @@
+import re
+import warnings
+
+
 class SimpleReader:
 
     def __init__(self):
@@ -41,6 +45,9 @@ class SimpleReader:
 
 
 class ListReader(SimpleReader):
+    _var_types = {"s": str, "i": int, "f": float, "b": bytes}
+    _var_types_pattern = "{([sifb]):(.+)}"
+
     def __init__(self):
         """
         Class for IO interaction, loads lists from an input file.
@@ -71,6 +78,29 @@ class ListReader(SimpleReader):
                         values = [val for val in value.split(", ")]
                     else:
                         values = [val for val in value.split(",")]
+                    for i in range(len(values)):
+                        if re.match(self._var_types_pattern, values[i]):
+                            if re.search(self._var_types_pattern, values[i]).group(1).lower() == "i":
+                                if re.search(self._var_types_pattern, values[i]).group(2).lower() == "true":
+                                    values[i] = True
+                                    continue
+                                if re.search(self._var_types_pattern, values[i]).group(2).lower() == "false":
+                                    values[i] = False
+                                    continue
+                            try:
+                                if re.search(self._var_types_pattern, values[i]).group(1).lower() == "b":
+                                    values[i] = bytes(re.search(self._var_types_pattern, values[i]).group(2), "utf-8")
+                                    continue
+                                else:
+                                    values[i] = self._var_types[re.search(self._var_types_pattern, values[i]).group(1)](
+                                        re.search(self._var_types_pattern, values[i]).group(2))
+                            except ValueError:
+                                warnings.warn("Formatted value of '" + values[i] +
+                                              "' is malformed! Failed to convert to type " +
+                                              str(self._var_types[re.search(
+                                                  self._var_types_pattern, values[i]).group(1)]))
+                        else:
+                            continue
                 except IndexError:
                     raise LookupError("Malformed file: '" + file_path + "'")
                 if key not in self._lookup.keys():

@@ -4,6 +4,8 @@ from .RawResourceBundle import RawResourceBundle, _new_bundle
 
 
 class ListResourceBundle(RawResourceBundle):
+    _cached_bundles = {}
+
     def __init__(self, path: str = None, root: str = "."):
         """
         Class that handles access to a resource across different locales.

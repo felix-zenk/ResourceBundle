@@ -82,10 +82,10 @@ class RawResourceBundle:
     def generate_parent_chain(self, base_name: str, locale_: Locale, root: str = None) -> None:
         """
         Generates the parent chain for this BasicResourceBundle.
-        :param base_name:
-        :type base_name:
-        :param locale_:
-        :type locale_:
+        :param base_name: The base name of this bundle
+        :type base_name: str
+        :param locale_: The Locale of this ResourceBundle
+        :type locale_: Locale
         :param root: The resources root directory path
         :type root: str
         :return: Nothing

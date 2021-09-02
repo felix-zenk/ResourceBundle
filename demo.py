@@ -45,8 +45,8 @@ def main():
 
     # Demonstration
     for bundle in [get_bundle("Strings", Locale.ROOT),
-                   get_bundle("Strings", Locale.Locale(language="fr")),
-                   get_bundle("Strings", Locale.Locale(language="de", country="de"))
+                   get_bundle("Strings", Locale.new_locale(language="fr")),
+                   get_bundle("Strings", Locale.new_locale(language="de", country="de"))
                    ]:
         print("\nCurrent bundle: " + bundle.get_name())
         demo(bundle, "this_is_a_key")
@@ -58,7 +58,7 @@ def main():
     # Integration of the locale module
     locale.setlocale(locale.LC_ALL, "it")
     print("\nTrying to use locale: " + str(locale.getlocale()))
-    bundle = get_bundle("Strings", Locale.Locale(use_locale_module=True))
+    bundle = get_bundle("Strings", Locale.new_locale(use_locale_module=True))
     print(("Current bundle: " + bundle.get_name()) if bundle.get_name() != "Strings.properties"
           else "Your Locale is not in the BasicResourceBundle! Fallback on: " + bundle.get_name())
     demo(bundle, "this_is_a_key")
@@ -69,7 +69,7 @@ def main():
 
     # List bundles
     print("\n\nList bundles also exist!")
-    write_to_file("Lists", "key=[This is a value, {s:and this too}, {i:1}, {f:1}, {i:True}, {b:00😂ff}]")
+    write_to_file("Lists", "key=[This is a value, {s:and this too}, {i:1}, {f:1}, {i:True}, {b:00🐧ff}]")
     bundle = get_list_bundle("Lists", Locale.ROOT)
     demo(bundle, "key")
 

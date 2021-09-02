@@ -29,7 +29,7 @@ class Locale:
                 return
             else:
                 from warnings import warn
-                warn("locale module could not be used! Used locale: "+str(locale.getlocale()))
+                warn("locale module could not be used! Used locale: " + str(locale.getlocale()))
         self._delim = "_"
         if language is None or language == "":
             self._language = ""
@@ -160,6 +160,26 @@ class Locale:
                 return Locale(language=self._language)
         else:
             return Locale(language=self._language)
+
+
+def new_locale(language: str = None, country: str = None, variant: str = None,
+               use_locale_module: bool = False) -> Locale:
+    """
+    Instantiates a new Locale
+    :param language: The language code
+    :type language: str
+    :param country: The country code
+    :type country: str
+    :param variant: The variant code
+    :type variant: str
+    :param use_locale_module: Whether or not to ignore the other params
+                              and use the locale defined through the locale module.
+                              Use locale.setlocale(locale.LC_ALL, "language") to set the used locale
+    :type use_locale_module: bool
+    :return: The new Locale object
+    :rtype: Locale
+    """
+    return Locale(language, country, variant, use_locale_module)
 
 
 # Constants

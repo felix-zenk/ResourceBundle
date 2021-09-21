@@ -44,7 +44,7 @@ def main():
     generate_bundle("Strings")
 
     # Demonstration
-    for bundle in [get_bundle("Strings", Locale.ROOT),
+    for bundle in [get_bundle("Strings", Locale.ROOT_LOCALE),
                    get_bundle("Strings", Locale.new_locale(language="fr")),
                    get_bundle("Strings", Locale.new_locale(language="de", country="de"))
                    ]:
@@ -70,7 +70,7 @@ def main():
     # List bundles
     print("\n\nList bundles also exist!")
     write_to_file("Lists", "key=[This is a value, {s:and this too}, {i:1}, {f:1}, {i:True}, {b:00🐧ff}]")
-    bundle = get_list_bundle("Lists", Locale.ROOT)
+    bundle = get_list_bundle("Lists", Locale.ROOT_LOCALE)
     demo(bundle, "key")
 
 

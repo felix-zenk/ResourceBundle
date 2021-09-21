@@ -1,7 +1,7 @@
 from typing import List
-from os.path import exists, isfile
+from os.path import exists, isfile, join
 
-from ..util.Locale import Locale, ROOT
+from ..util.Locale import Locale, ROOT_LOCALE, from_iso
 from ..exceptions import NotInResourceBundleError, MissingResourceBundleError
 
 
@@ -23,6 +23,7 @@ class RawResourceBundle:
         self.set_resources_root(root)  # Set correct root
         self._name = "INVALID" if path is None else path
 
+
     def _load(self, path: str) -> None:
         """
         Loads keys and values into this BasicResourceBundle instance.
@@ -32,7 +33,7 @@ class RawResourceBundle:
         :rtype: None
         """
         if self._root not in path:
-            self._reader.load(self._root + "/" + path)
+            self._reader.load(join(self._root, path))
         else:
             self._reader.load(path)
         self._lookup = self._reader.get()
@@ -210,7 +211,7 @@ def _to_bundle_name(base_name: str, locale_: Locale) -> str:
     :return: The name of the BasicResourceBundle
     :rtype: str
     """
-    return base_name + locale_.get_delim() + locale_.to_string() if locale_ != ROOT else base_name
+    return base_name + locale_.get_delim() + locale_.to_string() if locale_ != ROOT_LOCALE else base_name
 
 
 def _new_bundle(base_name: str, locale_: Locale, format_: str, root: str = ".",
@@ -230,12 +231,14 @@ def _new_bundle(base_name: str, locale_: Locale, format_: str, root: str = ".",
     :return: The new ResourceBundle
     :rtype: BasicResourceBundle
     """
+    if type(locale_) is str:
+        locale_ = from_iso(locale_)
     try:
-        bundle = bundle_type(_to_resource_name(_to_bundle_name(base_name, locale_), format_), root=root)
+        bundle = bundle_type.__init__(_to_resource_name(_to_bundle_name(base_name, locale_), format_), root=root)
         bundle.generate_parent_chain(base_name, locale_, root=root)
         return bundle
     except FileNotFoundError:
-        if locale_ != ROOT:
+        if locale_ != ROOT_LOCALE:
             return _new_bundle(base_name, locale_.get_top_locale(), format_, root=root, bundle_type=bundle_type)
         else:
             raise MissingResourceBundleError(_to_bundle_name(base_name, locale_))

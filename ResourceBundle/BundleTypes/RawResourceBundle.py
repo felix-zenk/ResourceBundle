@@ -234,7 +234,7 @@ def _new_bundle(base_name: str, locale_: Locale, format_: str, root: str = ".",
     if type(locale_) is str:
         locale_ = from_iso(locale_)
     try:
-        bundle = bundle_type.__init__(_to_resource_name(_to_bundle_name(base_name, locale_), format_), root=root)
+        bundle = bundle_type(_to_resource_name(_to_bundle_name(base_name, locale_), format_), root=root)
         bundle.generate_parent_chain(base_name, locale_, root=root)
         return bundle
     except FileNotFoundError:

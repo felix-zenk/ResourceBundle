@@ -12,11 +12,11 @@ The ResourceBundle module can be downloaded from [PyPI](https://pypi.org/project
 $  pip install ResourceBundle
 ```
 
-[![PyPI version](https://img.shields.io/badge/pypi-v1.0.3-yellow)](https://pypi.org/project/ResourceBundle)
+[![PyPI version](https://img.shields.io/badge/pypi-v1.0.4-yellow)](https://pypi.org/project/ResourceBundle)
 
 ### Usage
 
-Note: For a live demo look at [demo.py](https://github.com/felix-zenk/ResourceBundle/blob/main/demo.py)
+Note: For a demo look at [demo.py](https://github.com/felix-zenk/ResourceBundle/blob/main/demo.py)
 
 Each translation file you provide should have key-value pairs inside:
 ```

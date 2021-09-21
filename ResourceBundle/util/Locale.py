@@ -138,8 +138,7 @@ class Locale:
         :return: Whether this Locale is different from the other Locale
         :rtype: bool
         """
-        return not (self._language == other.get_language() and self._country == other.get_country()
-                    and self._variant == other.get_variant())
+        return not self == other
 
     def get_top_locale(self):
         """
@@ -149,7 +148,7 @@ class Locale:
         """
         if self._country == "" and self._variant == "":
             if self._language != "":
-                return ROOT
+                return ROOT_LOCALE
             else:
                 return None
 
@@ -182,5 +181,25 @@ def new_locale(language: str = None, country: str = None, variant: str = None,
     return Locale(language, country, variant, use_locale_module)
 
 
+def from_iso(iso_str: str):
+    """
+    Translates a locale string into a locale
+    !Experimental!
+    :param iso_str: The locale string
+    :type iso_str: str
+    :return: The new Locale
+    :rtype: Locale
+    """
+    parts = iso_str.split("_")
+    if len(parts) == 1:
+        return new_locale(language=parts[0])
+    elif len(parts) == 2:
+        return new_locale(language=parts[0], country=parts[1])
+    elif len(parts) == 3:
+        return new_locale(language=parts[0], country=parts[1], variant=parts[2])
+    else:
+        return ROOT_LOCALE
+
+
 # Constants
-ROOT = Locale(language="", country="", variant="")  # The root Locale
+ROOT_LOCALE = Locale(language="", country="", variant="")  # The root Locale

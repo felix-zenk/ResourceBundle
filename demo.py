@@ -69,7 +69,7 @@ def main():
 
     # List bundles
     print("\n\nList bundles also exist!")
-    write_to_file("Lists", "key=[This is a value, {s:and this too}, {i:1}, {f:1}, {i:True}, {b:00🐧ff}]")
+    write_to_file("Lists", "key=[This is a value, {s:and this too}, {i:1}, {f:1}, {i:True}, {b:00🐧ff}, {None}]")
     bundle = get_list_bundle("Lists", Locale.ROOT_LOCALE)
     demo(bundle, "key")
 

@@ -79,6 +79,9 @@ class ListReader(SimpleReader):
                     else:
                         values = [val for val in value.split(",")]
                     for i in range(len(values)):
+                        if values[i] == "{None}":
+                            values[i] = None
+                            continue
                         if re.match(self._var_types_pattern, values[i]):
                             if re.search(self._var_types_pattern, values[i]).group(1).lower() == "i":
                                 if re.search(self._var_types_pattern, values[i]).group(2).lower() == "true":

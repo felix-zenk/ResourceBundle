@@ -2,5 +2,5 @@ from .BundleTypes.BasicResourceBundle import BasicResourceBundle as ResourceBund
 from .BundleTypes.ListResourceBundle import ListResourceBundle, get_bundle as get_list_bundle
 from .util import Locale
 
-__version__ = "1.0.4a1"
+__version__ = "1.0.4a2"
 __author__ = "Felix Zenk <felix.zenk@web.de>"

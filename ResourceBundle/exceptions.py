@@ -19,5 +19,5 @@ class NotInResourceBundleError(LookupError):
         :param key: The key that could not be found
         :type key: str
         """
-        super(NotInResourceBundleError, self).__init__("Can't find key{} in bundle {}"
+        super(NotInResourceBundleError, self).__init__("Can't find key {} in bundle {}"
                                                        .format(key, bundle_name))

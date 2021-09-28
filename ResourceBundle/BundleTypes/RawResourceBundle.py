@@ -1,8 +1,12 @@
 from typing import List
 from os.path import exists, isfile, join
 
+from ResourceBundle.BundleTypes import RawResourceBundle
+
 from ..util.Locale import Locale, ROOT_LOCALE, from_iso
 from ..exceptions import NotInResourceBundleError, MissingResourceBundleError
+
+_STANDARD_FILE_EXTENSION = "properties"
 
 
 class RawResourceBundle:
@@ -83,6 +87,8 @@ class RawResourceBundle:
     def generate_parent_chain(self, base_name: str, locale_: Locale, root: str = None) -> None:
         """
         Generates the parent chain for this BasicResourceBundle.
+        :param bundle_type: The type of bundle to create
+        :type bundle_type: RawResourceBundle
         :param base_name: The base name of this bundle
         :type base_name: str
         :param locale_: The Locale of this ResourceBundle
@@ -101,7 +107,7 @@ class RawResourceBundle:
                 bundle = self._cached_bundles[_to_bundle_name(base_name, top_locale)]
                 bundle.set_resources_root(root)
             except KeyError:
-                bundle = get_bundle(base_name, top_locale, root=root)
+                bundle = _new_bundle(base_name, top_locale, self._name.split(".")[-1], root=root, bundle_type=type(self))
             self._set_parent(bundle)
 
     def get(self, key: str) -> str:
@@ -172,6 +178,9 @@ class RawResourceBundle:
     def __str__(self):
         return "<{} - '{}'>".format(self.__class__.__name__, self._name)
 
+    def __repr__(self):
+        return str(self)
+
 
 def get_bundle(base_name: str, locale_: Locale = None, root: str = ".") -> RawResourceBundle:
     """
@@ -185,7 +194,7 @@ def get_bundle(base_name: str, locale_: Locale = None, root: str = ".") -> RawRe
     :return: The ResourceBundle
     :rtype: BasicResourceBundle
     """
-    return _new_bundle(base_name, locale_, "properties", root=root)
+    return _new_bundle(base_name, locale_, _STANDARD_FILE_EXTENSION, root=root)
 
 
 def _to_resource_name(bundle_name: str, format_: str) -> str:

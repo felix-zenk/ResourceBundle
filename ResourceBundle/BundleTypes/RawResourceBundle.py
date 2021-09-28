@@ -231,6 +231,9 @@ def _new_bundle(base_name: str, locale_: Locale, format_: str, root: str = ".",
     :return: The new ResourceBundle
     :rtype: BasicResourceBundle
     """
+    if locale_ is None:
+        return _new_bundle(base_name=base_name, locale_=ROOT_LOCALE, format_=format_,
+                           root=root, bundle_type=bundle_type)
     if type(locale_) is str:
         locale_ = from_iso(locale_)
     try:

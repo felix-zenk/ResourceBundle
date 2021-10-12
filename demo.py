@@ -32,11 +32,11 @@ def demo(bundle_: ResourceBundle, key: str):
 
 
 def demo_format(bundle_, key):
-    print("Key: {:<20} - Value: {}".format(key, bundle_.get_formatted(key, "Custom stuff")))
+    print("Key: {:<20} - Value: {}".format(key, bundle_.get(key, "Custom stuff")))
 
 
 def demo_recursive_format(bundle_, key):
-    print("Key: {:<20} - Value: {}".format(key, bundle_.get_formatted(key)))
+    print("Key: {:<20} - Value: {}".format(key, bundle_.get(key)))
 
 
 def main():
@@ -69,10 +69,25 @@ def main():
 
     # List bundles
     print("\n\nList bundles also exist!")
-    write_to_file("Lists", "key=[This is a value, {s:and this too}, {i:1}, {f:1}, {i:True}, {b:00🐧ff}, {None}]")
+    write_to_file("Lists", "key=[This is a value, {s:and this too}, {i:1}, {f:1}, {i:True}, {b:00🐧ff}, {None}, {key2}]\n"
+                           "key2=[]\n"
+                           "key3=[[\"Hallo\"], []]")
     bundle = get_list_bundle("Lists", Locale.ROOT_LOCALE)
     demo(bundle, "key")
+    demo(bundle, "key2")
+    demo(bundle, "key3")
+
+
+def main2():
+    write_to_file("Lists",
+                  "key=[This is a value, {s:and this too}, {i:1}, {f:1}, {i:True}, {b:00🐧ff}, {None}, {key2}, {key3}]\n"
+                  "key2=[]\n"
+                  "key3=[[Hallo], [], Just\\, a value]")
+    bundle = get_list_bundle("Lists", Locale.ROOT_LOCALE)
+    print(bundle.get("key"))
+    print(bundle.get("key2"))
+    print(bundle.get("key3"))
 
 
 if __name__ == '__main__':
-    main()
+    main2()

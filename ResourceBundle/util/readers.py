@@ -98,7 +98,8 @@ class ListReader(SimpleReader):
                 # remaining items in list
                 output.extend(
                     [_parse(part.replace("\x1D", ",")) for part in
-                     [val.strip() for val in value_[1:-1].replace("\\,", "\x1D").split(",")
+                     [(val.strip() if val.strip().startswith("{") and val.strip().endswith("}") else val)
+                      for val in value_[1:-1].replace("\\,", "\x1D").split(",")
                       if not (val.strip().startswith("[") or val.strip().endswith("]"))]
                      ])
             else:

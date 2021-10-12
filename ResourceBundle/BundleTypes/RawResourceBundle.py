@@ -1,10 +1,10 @@
-from typing import List
+import re
+from typing import List, Type
 from os.path import exists, isfile, join
-
-from ResourceBundle.BundleTypes import RawResourceBundle
 
 from ..util.Locale import Locale, ROOT_LOCALE, from_iso
 from ..exceptions import NotInResourceBundleError, MissingResourceBundleError
+
 
 _STANDARD_FILE_EXTENSION = "properties"
 
@@ -42,7 +42,19 @@ class RawResourceBundle:
             self._reader.load(path)
         self._lookup = self._reader.get()
 
-    def _handle_get_object(self, key) -> object:
+    def _needs_formatting(self, value: str) -> bool:
+        return re.findall(r'{[^}]*}', value)
+
+    def _format(self, value, *args, **kwargs):
+        if self._needs_formatting(value):
+            try:
+                return self._format(value.format(*args, **kwargs, **self._lookup))
+            except KeyError:
+                return self._parent.get(*args, **kwargs, **self._lookup)
+        else:
+            return value
+
+    def _handle_get_object(self, key, *args, **kwargs) -> object:
         """
         Searches the given key in this BasicResourceBundle and returns its value if found, else None.
         :param key:
@@ -51,7 +63,9 @@ class RawResourceBundle:
         :rtype:
         """
         try:
-            return self._lookup[key]
+            return self._format(self._lookup[key], *args, **kwargs) \
+                if self._needs_formatting(self._lookup[key]) \
+                else self._lookup[key]
         except KeyError:
             return None
 
@@ -110,7 +124,7 @@ class RawResourceBundle:
                 bundle = _new_bundle(base_name, top_locale, self._name.split(".")[-1], root=root, bundle_type=type(self))
             self._set_parent(bundle)
 
-    def get(self, key: str) -> str:
+    def get(self, key: str, *args, **kwargs) -> str:
         """
         Gets an object from the BasicResourceBundle.
         :param key: The key of the desired object
@@ -118,10 +132,10 @@ class RawResourceBundle:
         :return: The object
         :rtype: str
         """
-        obj = self._handle_get_object(key)
+        obj = self._handle_get_object(key, *args, **kwargs)
         if obj is None:
             if self._parent is not None:
-                obj = self._parent.get(key)
+                obj = self._parent.get(key, *args, **kwargs)
             if obj is None:
                 raise NotInResourceBundleError(self._name, key)
         return obj
@@ -224,7 +238,8 @@ def _to_bundle_name(base_name: str, locale_: Locale) -> str:
 
 
 def _new_bundle(base_name: str, locale_: Locale, format_: str, root: str = ".",
-                bundle_type: RawResourceBundle = RawResourceBundle) -> RawResourceBundle:
+                bundle_type: Type[RawResourceBundle] = RawResourceBundle
+                ) -> RawResourceBundle:
     """
     Creates a new ResourceBundle.
     :param base_name: The base name of this ResourceBundle
@@ -244,7 +259,7 @@ def _new_bundle(base_name: str, locale_: Locale, format_: str, root: str = ".",
         return _new_bundle(base_name=base_name, locale_=ROOT_LOCALE, format_=format_,
                            root=root, bundle_type=bundle_type)
     if type(locale_) is str:
-        locale_ = from_iso(locale_)
+        locale_ = from_iso(str(locale_))
     try:
         bundle = bundle_type(_to_resource_name(_to_bundle_name(base_name, locale_), format_), root=root)
         bundle.generate_parent_chain(base_name, locale_, root=root)

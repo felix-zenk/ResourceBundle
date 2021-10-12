@@ -1,5 +1,6 @@
 import re
 import warnings
+from typing import Union
 
 
 class SimpleReader:
@@ -63,50 +64,60 @@ class ListReader(SimpleReader):
         :return: Nothing
         :rtype: None
         """
+        def _parse(item: str) -> Union[str, int, float, bytes, None]:
+            if item == "{None}":
+                return None
+            if re.match(self._var_types_pattern, item):  # If should be converted
+                if re.search(self._var_types_pattern, item).group(1).lower() == "i":
+                    if re.search(self._var_types_pattern, item).group(2).lower() == "true":
+                        return True
+                    if re.search(self._var_types_pattern, item).group(2).lower() == "false":
+                        return False
+                try:
+                    if re.search(self._var_types_pattern, item).group(1).lower() == "b":
+                        return bytes(re.search(self._var_types_pattern, item).group(2), "utf-8")
+                    else:
+                        return self._var_types[re.search(self._var_types_pattern, item).group(1)](
+                            re.search(self._var_types_pattern, item).group(2))
+                except ValueError:
+                    warnings.warn("Formatted value of '" + item +
+                                  "' is malformed! Failed to convert to type " +
+                                  str(self._var_types[re.search(
+                                      self._var_types_pattern, item).group(1)]))
+            return item
+
+        def _handle_list(value_: str) -> list:
+            output = []
+            while value_.endswith("\n") or value_.endswith("\r"):
+                value_ = value_[:-1]
+            if value_.strip() == '[]':
+                return output
+            if value_.startswith("[") and value_.endswith("]"):
+                # list in list
+                output.extend([_handle_list("["+val.split("]")[0]+"]") for val in value_[1:-1].split("[")[1:]])
+                # remaining items in list
+                output.extend(
+                    [_parse(part.replace("\x1D", ",")) for part in
+                     [val.strip() for val in value_[1:-1].replace("\\,", "\x1D").split(",")
+                      if not (val.strip().startswith("[") or val.strip().endswith("]"))]
+                     ])
+            else:
+                raise TypeError("Not a list! "+str(value_))
+            return output
+
+        # # # READ FILE # # #
         with open(file_path, encoding="utf-8") as f:
             lines = f.readlines()
         for line in lines:
             if not (line.strip().startswith('#') or line.strip() == ""):
                 try:
                     key = line.split("=")[0].strip()
-                    value = line.split("=")[1]
-                    if value.endswith("\n"):
-                        value = value[:-1]
-                    if value.endswith("]") and value.startswith("["):
-                        value = value[1:-1]
-                    if ", " in value:
-                        values = [val for val in value.split(", ")]
-                    else:
-                        values = [val for val in value.split(",")]
-                    for i in range(len(values)):
-                        if values[i] == "{None}":
-                            values[i] = None
-                            continue
-                        if re.match(self._var_types_pattern, values[i]):
-                            if re.search(self._var_types_pattern, values[i]).group(1).lower() == "i":
-                                if re.search(self._var_types_pattern, values[i]).group(2).lower() == "true":
-                                    values[i] = True
-                                    continue
-                                if re.search(self._var_types_pattern, values[i]).group(2).lower() == "false":
-                                    values[i] = False
-                                    continue
-                            try:
-                                if re.search(self._var_types_pattern, values[i]).group(1).lower() == "b":
-                                    values[i] = bytes(re.search(self._var_types_pattern, values[i]).group(2), "utf-8")
-                                    continue
-                                else:
-                                    values[i] = self._var_types[re.search(self._var_types_pattern, values[i]).group(1)](
-                                        re.search(self._var_types_pattern, values[i]).group(2))
-                            except ValueError:
-                                warnings.warn("Formatted value of '" + values[i] +
-                                              "' is malformed! Failed to convert to type " +
-                                              str(self._var_types[re.search(
-                                                  self._var_types_pattern, values[i]).group(1)]))
-                        else:
-                            continue
+                    value = _handle_list(line.split("=")[1])
                 except IndexError:
                     raise LookupError("Malformed file: '" + file_path + "'")
+                except TypeError as te:
+                    raise TypeError("Key '"+key+"' is not a valid list")
                 if key not in self._lookup.keys():
-                    self._lookup[key] = values
+                    self._lookup[key] = value
                 else:
                     raise LookupError("Duplicate key '" + key + "' in file '" + file_path + "'")

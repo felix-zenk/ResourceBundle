@@ -1,10 +1,11 @@
+import re
+
 from ..util.Locale import Locale
 from ..util.readers import ListReader
 from .RawResourceBundle import RawResourceBundle, _new_bundle
 
 
 class ListResourceBundle(RawResourceBundle):
-    _cached_bundles = {}
 
     def __init__(self, path: str = None, root: str = "."):
         """
@@ -35,6 +36,23 @@ class ListResourceBundle(RawResourceBundle):
         else:
             self._reader.load(path)
         self._lookup = self._reader.get()
+
+    def _needs_formatting(self, value: list) -> bool:
+        for val in value:
+            if re.findall(r'{[^}]*}', str(val)):
+                return True  # At least one value needs formatting
+        return False
+
+    def _format(self, value, *args, **kwargs):
+        if self._needs_formatting(value):
+            try:
+                return self._format(list([
+                    (val.format(*args, **kwargs, **self._lookup) if isinstance(val, str) else val)
+                    for val in value]))
+            except KeyError:
+                return self._parent.get(*args, **kwargs, **self._lookup)
+        else:
+            return value
 
 
 def get_bundle(base_name: str, locale_: Locale = None, root: str = ".") -> RawResourceBundle:

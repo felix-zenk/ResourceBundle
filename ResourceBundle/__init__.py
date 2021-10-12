@@ -3,4 +3,5 @@ from .BundleTypes.ListResourceBundle import ListResourceBundle, get_bundle as ge
 from .util import Locale
 
 __version__ = "1.0.4a2"
-__author__ = "Felix Zenk <felix.zenk@web.de>"
+__author__ = "Felix Zenk"
+__email__ = "felix.zenk@web.de"

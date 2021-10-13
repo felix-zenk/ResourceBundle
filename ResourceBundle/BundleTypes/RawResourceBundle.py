@@ -50,13 +50,13 @@ class RawResourceBundle:
             try:
                 return self._format(value.format(*args, **kwargs, **self._lookup))
             except KeyError:
-                return self._parent.get(*args, **kwargs, **self._lookup)
+                return self._parent._format(value, *args, **kwargs)
         else:
             return value
 
     def _handle_get_object(self, key, *args, **kwargs) -> object:
         """
-        Searches the given key in this BasicResourceBundle and returns its value if found, else None.
+        Searches the given key in this ResourceBundle and returns its value if found, else None.
         :param key:
         :type key:
         :return:

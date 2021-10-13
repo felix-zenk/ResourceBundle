@@ -97,11 +97,10 @@ class ListReader(SimpleReader):
                 output.extend([_handle_list("["+val.split("]")[0]+"]") for val in value_[1:-1].split("[")[1:]])
                 # remaining items in list
                 output.extend(
-                    [_parse(part.replace("\x1D", ",")) for part in
-                     [(val.strip() if val.strip().startswith("{") and val.strip().endswith("}") else val)
-                      for val in value_[1:-1].replace("\\,", "\x1D").split(",")
-                      if not (val.strip().startswith("[") or val.strip().endswith("]"))]
-                     ])
+                    [_parse(item.strip().replace("\uE000", ","))
+                     for item in value_[1:-1].replace("\\,", "\uE000").split(",")
+                     if not (item.strip().startswith("[") or item.strip().endswith("]"))]
+                )
             else:
                 raise TypeError("Not a list! "+str(value_))
             return output

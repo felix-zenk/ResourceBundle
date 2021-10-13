@@ -60,7 +60,7 @@ def main():
     print("\nTrying to use locale: " + str(locale.getlocale()))
     bundle = get_bundle("Strings", Locale.new_locale(use_locale_module=True))
     print(("Current bundle: " + bundle.get_name()) if bundle.get_name() != "Strings.properties"
-          else "Your Locale is not in the BasicResourceBundle! Fallback on: " + bundle.get_name())
+          else "Your Locale is not in the ResourceBundle! Fallback on: " + bundle.get_name())
     demo(bundle, "this_is_a_key")
     demo(bundle, "second_key")
     demo(bundle, "key_only_in_root")
@@ -69,9 +69,9 @@ def main():
 
     # List bundles
     print("\n\nList bundles also exist!")
-    write_to_file("Lists", "key=[This is a value, {s:and this too}, {i:1}, {f:1}, {i:True}, {b:00🐧ff}, {None}, {key2}]\n"
-                           "key2=[]\n"
-                           "key3=[[\"Hallo\"], []]")
+    write_to_file("Lists", "key=[This is a value, {s:and this too}, {i:1}, {f:1}, {i:True}, {b:00🐧ff}, {None}, {key2}, {key3}]\n"
+                           "key2=[Escape commas like: \\\\,]\n"
+                           "key3=[[Hallo], []]")
     bundle = get_list_bundle("Lists", Locale.ROOT_LOCALE)
     demo(bundle, "key")
     demo(bundle, "key2")
@@ -82,12 +82,14 @@ def main2():
     write_to_file("Lists",
                   "key=[This is a value, {s:and this too}, {i:1}, {f:1}, {i:True}, {b:00🐧ff}, {None}, {key2}, {key3}]\n"
                   "key2=[]\n"
-                  "key3=[[Hallo], [], Just\\, a value]")
+                  "key3=[[Hallo], [{None},{None}], Just\\, a value]")
     bundle = get_list_bundle("Lists", Locale.ROOT_LOCALE)
+    print("\nList TESTS")
     print(bundle.get("key"))
     print(bundle.get("key2"))
     print(bundle.get("key3"))
 
 
 if __name__ == '__main__':
+    main()
     main2()

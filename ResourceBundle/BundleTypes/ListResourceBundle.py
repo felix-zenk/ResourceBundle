@@ -38,6 +38,8 @@ class ListResourceBundle(RawResourceBundle):
         self._lookup = self._reader.get()
 
     def _needs_formatting(self, value: list) -> bool:
+        return False  # Disabled list formatting in this version
+
         for val in value:
             if re.findall(r'{[^}]*}', str(val)):
                 return True  # At least one value needs formatting

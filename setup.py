@@ -9,7 +9,9 @@ with open("README.md", "r", encoding='utf-8') as fh:
     long_description = re.sub(r"\[!\[PyPI version.*\d+\.\d+\.\d+.*yellow\)\]\(.*project/ResourceBundle\)", "",
                               long_description)
 
-url = "https://felix-zenk.github.io/projects/ResourceBundle"
+homepage = "https://felix-zenk.github.io/projects/ResourceBundle"
+source = "https://github.com/felix-zenk/ResourceBundle"
+
 
 setuptools.setup(
     name="ResourceBundle",
@@ -20,10 +22,10 @@ setuptools.setup(
                 "depending on the current locale",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url=url,
+    url=homepage,
     project_urls={
-        "Bug Reports": url+"/issues/new?labels=bug&template=bug_report.md&title=%5BBUG%5D%3A+",
-        "Source": url
+        "Bug Reports": source+"/issues/new?labels=bug&template=bug_report.md&title=%5BBUG%5D%3A+",
+        "Source": source
     },
     packages=setuptools.find_packages(),
     classifiers=[

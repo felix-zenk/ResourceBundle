@@ -56,13 +56,14 @@ class ResourceBundle(object):
     """
     __cached_bundles = dict()
 
-    __slots__ = ["_name", "_locale", "_parent", "_mapping"]
+    __slots__ = ["_name", "_locale", "_parent", "_mapping", "_path"]
 
     def __init__(self, bundle_name: str, bundle_locale: str | None, *, path: str | PathLike = None) -> None:
         self._name: str = bundle_name
         self._locale: str | None = bundle_locale
         self._parent: ResourceBundle | None = self._get_parent_bundle()
-        self._mapping: dict[str, str] = self._map(path=path)
+        self._path = path
+        self._mapping: dict[str, str] = self._map(path=self._path)
         # Save self in cache
         self.__cached_bundles[self.name] = self
 
@@ -93,7 +94,7 @@ class ResourceBundle(object):
         if self.__cached_bundles.get(parent_locale) is not None:
             return self.__cached_bundles.get(parent_locale)
         # Not cached, start building chain
-        return ResourceBundle(self._name, parent_locale)
+        return ResourceBundle(self._name, parent_locale, path=self._path)
 
     def _map(self, path: str | PathLike | None) -> dict[str, str]:
         if path is None:
@@ -135,12 +136,13 @@ class ResourceBundle(object):
         raise NotInResourceBundleError(self.name, item)
 
 
-def get_bundle(bundle_name: str, locale: str | Sequence[str | str] = None) -> ResourceBundle:
+def get_bundle(bundle_name: str, locale: str | Sequence[str | str] = None, path: Path | str = None) -> ResourceBundle:
     """
     Get a :class:`ResourceBundle` after parsing the locale
 
     :param str bundle_name: The bundles base name
     :param str | Sequence[str | str] locale: The locale as a string or from the locale module
+    :param Path | str path: The base path where the ResourceBundle is found
     """
     # locale was supplied
     if locale is None:
@@ -155,4 +157,4 @@ def get_bundle(bundle_name: str, locale: str | Sequence[str | str] = None) -> Re
 
     # bundle name
     extracted_name = bundle_name
-    return ResourceBundle(extracted_name, extracted_locale)
+    return ResourceBundle(extracted_name, extracted_locale, path=path)

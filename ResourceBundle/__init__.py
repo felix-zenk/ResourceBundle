@@ -61,8 +61,8 @@ class ResourceBundle(object):
     def __init__(self, bundle_name: str, bundle_locale: str | None, *, path: str | PathLike = None) -> None:
         self._name: str = bundle_name
         self._locale: str | None = bundle_locale
-        self._parent: ResourceBundle | None = self._get_parent_bundle()
         self._path = path
+        self._parent: ResourceBundle | None = self._get_parent_bundle()
         self._mapping: dict[str, str] = self._map(path=self._path)
         # Save self in cache
         self.__cached_bundles[self.name] = self

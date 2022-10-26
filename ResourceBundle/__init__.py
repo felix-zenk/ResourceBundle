@@ -27,7 +27,6 @@ class _Parser(object):
         :return: The contents of the file as a key-value dict
         """
         # I/O read
-        print(file_path)
         with open(file_path, mode="r", encoding="utf-8") as f:
             lines = f.readlines()
 

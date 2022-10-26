@@ -9,7 +9,7 @@ from typing import Sequence, KeysView
 
 from .exceptions import NotInResourceBundleError, MalformedResourceBundleError
 
-__version__ = "2.0.1"
+__version__ = "2.0.2"
 __author__ = "Felix Zenk"
 __email__ = "felix.zenk@web.de"
 
@@ -59,11 +59,26 @@ class ResourceBundle(object):
     __slots__ = ["_name", "_locale", "_parent", "_mapping", "_path"]
 
     def __init__(self, bundle_name: str, bundle_locale: str | None, *, path: str | PathLike = None) -> None:
+        """
+        Initialize a ResourceBundle
+
+        :param str bundle_name:
+            The base name of the ResourceBundle
+        :param str | None bundle_locale:
+            The specific locale consisting of a ISO 639-1 language code,
+            a script code, an ISO 3166-1 alpha-2 country code and a variant code
+            separated by underscores.
+            The format for a locale therefore is 'language_script_country_variant'
+            like 'en_Latn_US_WINDOWS' or parts of it like 'en_US'
+        :param str | PathLike | None path:
+            The path to the ResourceBundle .properties files
+            (default: current working directory)
+        """
         self._name: str = bundle_name
         self._locale: str | None = bundle_locale
-        self._path = path
+        self._path: Path = self._ensure_path(path)
         self._parent: ResourceBundle | None = self._get_parent_bundle()
-        self._mapping: dict[str, str] = self._map(path=self._path)
+        self._mapping: dict[str, str] = self._map()
         # Save self in cache
         self.__cached_bundles[self.name] = self
 
@@ -96,13 +111,21 @@ class ResourceBundle(object):
         # Not cached, start building chain
         return ResourceBundle(self._name, parent_locale, path=self._path)
 
-    def _map(self, path: str | PathLike | None) -> dict[str, str]:
-        if path is None:
-            path = Path()
+    def _map(self) -> dict[str, str]:
         try:
-            return _Parser.parse(Path(str(path)) / f"{self.name}.properties")
+            return _Parser.parse(self._path / f"{self.name}.properties")
         except FileNotFoundError:
             return dict()
+
+    @staticmethod
+    def _ensure_path(path: str | PathLike | None) -> Path:
+        if isinstance(path, PathLike):
+            return Path(path.__fspath__())
+        if isinstance(path, str):
+            return Path(path)
+        if path is None:
+            return Path()
+        raise TypeError(f"Path must be of type str or PathLike, not {type(path)}")
 
     def __getitem__(self, item) -> str:
         return self.get(item)
@@ -138,23 +161,20 @@ class ResourceBundle(object):
 
 def get_bundle(bundle_name: str, locale: str | Sequence[str | str] = None, path: Path | str = None) -> ResourceBundle:
     """
-    Get a :class:`ResourceBundle` after parsing the locale
+    Return a new :class:`ResourceBundle` after parsing the locale
 
-    :param str bundle_name: The bundles base name
+    :param str bundle_name: The base name of the ResourceBundle
     :param str | Sequence[str | str] locale: The locale as a string or from the locale module
-    :param Path | str path: The base path where the ResourceBundle is found
+    :param Path | str | None path: The path to the ResourceBundle .properties files (default: current working directory)
     """
-    # locale was supplied
+    # locale was not supplied
     if locale is None:
-        extracted_locale = None
-    else:
-        # simple string
-        if isinstance(locale, str):
-            extracted_locale = locale
-        # locale from the locale module
-        else:
-            extracted_locale, _ = locale
+        return ResourceBundle(bundle_name=bundle_name, bundle_locale=None, path=path)
 
-    # bundle name
-    extracted_name = bundle_name
-    return ResourceBundle(extracted_name, extracted_locale, path=path)
+    # simple string
+    if isinstance(locale, str):
+        return ResourceBundle(bundle_name=bundle_name, bundle_locale=locale, path=path)
+
+    # locale from the locale module
+    extracted_locale, _ = locale
+    return ResourceBundle(bundle_name=bundle_name, bundle_locale=extracted_locale, path=path)

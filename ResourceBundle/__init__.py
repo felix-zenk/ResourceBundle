@@ -81,6 +81,12 @@ class ResourceBundle(object):
         # Save self in cache
         self.__cached_bundles[self.name] = self
 
+    def __repr__(self) -> str:
+        return f"<{self.__class__.__name__} {self.name}>"
+
+    def __str__(self) -> str:
+        return self.name
+
     @property
     def name(self) -> str:
         """

@@ -9,7 +9,7 @@ from typing import Sequence, KeysView
 
 from .exceptions import NotInResourceBundleError, MalformedResourceBundleError
 
-__version__ = "2.0.2"
+__version__ = "2.0.3"
 __author__ = "Felix Zenk"
 __email__ = "felix.zenk@web.de"
 

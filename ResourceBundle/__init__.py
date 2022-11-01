@@ -3,13 +3,15 @@ Module containing the implementation of the ResourceBundle
 """
 from __future__ import annotations
 
+import codecs
+import re
 from os import PathLike
 from pathlib import Path
 from typing import Sequence, KeysView
 
 from .exceptions import NotInResourceBundleError, MalformedResourceBundleError
 
-__version__ = "2.0.3"
+__version__ = "2.0.5"
 __author__ = "Felix Zenk"
 __email__ = "felix.zenk@web.de"
 
@@ -26,22 +28,54 @@ class _Parser(object):
         :param Path file_path:
         :return: The contents of the file as a key-value dict
         """
+        def is_comment(line: str) -> bool:
+            return line.strip().startswith('#') or line.strip(' \n\r') == ""
+
+        def decode(arg: str) -> str:
+            # 'Unescape' chars
+            pattern = re.compile(  # from https://stackoverflow.com/a/24519338/14563958
+                r'''( \\U........  # 8-digit hex escapes
+                | \\u....          # 4-digit hex escapes
+                | \\x..            # 2-digit hex escapes
+                | \\[0-7]{1,3}     # Octal escapes
+                | \\N\{[^}]+\}     # Unicode characters by name
+                | \\[\\'"abfnrtv]  # Single-character escapes
+                )''', re.UNICODE | re.VERBOSE
+            )
+            return re.sub(
+                pattern,
+                lambda match: codecs.decode(match.group(0), 'unicode-escape'),
+                arg
+            )
+
         # I/O read
         with open(file_path, mode="r", encoding="utf-8") as f:
             lines = f.readlines()
 
         # parse
         mapping = dict()
-        for line_no, line in enumerate(lines, start=1):
-            if line.strip().startswith('#') or line.strip(' \n\r') == "":
+        enumerator = enumerate(lines, start=1)
+        for line_no, line in enumerator:
+            if is_comment(line):
                 continue
-            if "=" not in line:
+
+            if line.strip().endswith("=\\"):  # single line continuation
+                value = ""
+                pair = line.split("=")
+                key = pair[0].strip()
+                new_value = "\\"  # init new_value
+                while new_value.strip().endswith("\\"):  # more line continuations
+                    new_line_no, new_value = next(enumerator)
+                    value += new_value.strip().strip("\\")
+            elif "=" in line:
+                key, *value = line.split("=")
+                key = key.strip()
+                value = '='.join(value).strip()
+            else:
                 raise MalformedResourceBundleError(f"Malformed file: '{file_path}' (line {line_no})")
 
-            key, *value = line.split("=")
-            key = key.strip()
-            value = '='.join(value).strip()
-
+            if '\\' in value:  # may contain escaped chars
+                value = decode(value)
             if key not in mapping.keys():
                 mapping[key] = value
             else:

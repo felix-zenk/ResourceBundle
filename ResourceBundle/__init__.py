@@ -5,15 +5,15 @@ from __future__ import annotations
 
 import codecs
 import re
-from os import PathLike
+from datetime import datetime
+from os import PathLike, listdir
 from pathlib import Path
 from typing import Sequence, KeysView
 
 from .exceptions import NotInResourceBundleError, MalformedResourceBundleError
 
-__version__ = "2.0.5"
-__author__ = "Felix Zenk"
-__email__ = "felix.zenk@web.de"
+__version_info__ = (2, 1, 0)
+__version__ = ".".join(map(str, __version_info__))
 
 
 class _Parser(object):
@@ -42,11 +42,7 @@ class _Parser(object):
                 | \\[\\'"abfnrtv]  # Single-character escapes
                 )''', re.UNICODE | re.VERBOSE
             )
-            return re.sub(
-                pattern,
-                lambda match: codecs.decode(match.group(0), 'unicode-escape'),
-                arg
-            )
+            return re.sub(pattern, lambda match: codecs.decode(match.group(0), 'unicode-escape'), arg)
 
         # I/O read
         with open(file_path, mode="r", encoding="utf-8") as f:
@@ -217,3 +213,64 @@ def get_bundle(bundle_name: str, locale: str | Sequence[str | str] = None, path:
     # locale from the locale module
     extracted_locale, _ = locale
     return ResourceBundle(bundle_name=bundle_name, bundle_locale=extracted_locale, path=path)
+
+
+_pot_header = '''\
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ORGANIZATION
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: 1.0\\n"
+"POT-Creation-Date: {time}\\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\\n"
+"Language-Team: LANGUAGE <LL@li.org>\\n"
+"MIME-Version: 1.0\\n"
+"Content-Type: text/plain; charset=UTF-8\\n"
+"Content-Transfer-Encoding: 8bit\\n"
+"Generated-By: ResourceBundle {version}\\n"
+
+''' # from pygettext.py
+
+
+class Converter:
+    @staticmethod
+    def to_gettext(src_path: str | PathLike, dst_path: str | PathLike) -> None:
+        """
+        Convert ResourceBundle files to a gettext folder structure.
+        This function will create a new directory called ``locales`` in the destination directory.
+        It does not take multiple ResourceBundles into account!
+        When multiple ResourceBundles are present in the src_path, they will be all processed together.
+        The result is a (wrong) merged base.pot of both bundles, and correctly assigned .po files for each locale.
+
+        :param src_path: The src path in which the ResourceBundle .properties files are located.
+        :param dst_path: The dst path in which the gettext files will be created.
+        """
+        src_path = Path(str(src_path))
+        dst_path = Path(str(dst_path)) / "locales"
+        msg_ids = set()
+        resource_bundle_files = [filename for filename in listdir(src_path) if filename.endswith(".properties")]
+        if len(resource_bundle_files) == 0:
+            raise ValueError("No .properties files found in the src_path.")
+
+        for filename in resource_bundle_files:
+            if '_' not in filename:
+                bundle_name, locale = (src_path / filename).stem, None
+                dst_file_path = dst_path / f"{bundle_name}_restored_default_values.po"
+            else:
+                bundle_name, locale = (src_path / filename).stem.split("_", 1)
+                dst_file_path = dst_path / locale / "LC_MESSAGES" / f"{bundle_name}.po"
+
+            dst_file_path.parent.mkdir(parents=True, exist_ok=True)
+            with open(dst_file_path, mode="w") as dst_fd:
+                dst_fd.write(_pot_header.format(time=datetime.now().strftime("%Y-%m-%d %H:%M%z"), version=__version__))
+                for key, value in dict(get_bundle(bundle_name, locale, path=src_path)).items():
+                    dst_fd.write(f'msgid "{key}"\nmsgstr "{value.strip()}"\n\n')
+                    msg_ids.add(key)
+
+        with open(dst_path / "base.pot", mode="w") as f:
+            f.write(_pot_header.format(time=datetime.now().strftime("%Y-%m-%d %H:%M%z"), version=__version__))
+            for msg_id in sorted(msg_ids):
+                f.write(f'msgid "{msg_id}"\nmsgstr ""\n\n')

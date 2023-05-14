@@ -1,5 +1,5 @@
 import setuptools
-from ResourceBundle import __version__, __author__, __email__
+from ResourceBundle import __version__
 
 with open("README.md", "r", encoding='utf-8') as fh:
     long_description = fh.read()
@@ -11,8 +11,8 @@ source = "https://github.com/felix-zenk/ResourceBundle"
 setuptools.setup(
     name="ResourceBundle",
     version=__version__,
-    author=__author__,
-    author_email=__email__,
+    author='Felix Zenk',
+    author_email='felix.zenk@web.de',
     description="ResourceBundle is a module that manages internationalization of string resources",
     long_description=long_description,
     long_description_content_type="text/markdown",

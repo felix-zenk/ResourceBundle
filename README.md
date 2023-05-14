@@ -8,62 +8,73 @@
 ResourceBundle is a module that manages internationalization of string resources.
 It is inspired by javas ResourceBundle and accepts the same format as a java PropertyResourceBundle.
 
-> **Note:** ResourceBundle is not the python way of doing internationalization.
-> This package is only intended to be used if you *absolutely have* to work with ResourceBundle files
-> or need a quick working way when porting from java.
->
-> For information on how to do internationalization in python,
-> see the [official documentation](https://docs.python.org/3/library/gettext.html).
-> You can use the `ResourceBundle.Converter.to_gettext()` method to convert your ResourceBundle files to gettext po files.
-
 ---
 ### Installation
 
 The ResourceBundle module can be downloaded from [PyPI](https://pypi.org/project/ResourceBundle):
 
 ```bash
-# linux / macOS
-$  python3 -m pip install ResourceBundle
-
-# windows
->  py -m pip install ResourceBundle
+$  python -m pip install ResourceBundle
 ```
 
 ### Usage
 
-Assuming you come from java, you are probably familiar with the ResourceBundle file format.
-If not,you can read about it
-[here](https://docs.oracle.com/en/java/javase/20/docs/api/java.base/java/util/PropertyResourceBundle.html).
+Each translation file you provide should have key-value pairs inside:
+```
+# This is a comment
 
-Get a ResourceBundle instance is by using ``ResourceBundle.get_bundle(name, locale)``.
+key=value
+another_key=Another value
+```
+
+Save the files of your ResourceBundle in the following structure and file name format:
+```
+./
+├── BundleName.properties  # Recommended as a fallback
+├── BundleName_languageCode_countryCode_variant.properties
+└── ...
+```
+
+For example:
+```
+./
+├── Strings.properties
+├── Strings_en.properties
+├── Strings_en_US.properties
+└── ...
+```
+
+The recommended way to get a ResourceBundle instance is by using ``ResourceBundle.get_bundle(name, locale)``.
+This function also provides support for pythons builtin ``locale`` moudule.
 
 ```python
+import locale
 import ResourceBundle
 
 bundle = ResourceBundle.get_bundle("Strings", "en")
+bundle = ResourceBundle.get_bundle("Strings", locale.getlocale())
 
 # It is now possible to get a resource with the get() method
 bundle.get("key")
 ```
 
 If the key could not be found in the ResourceBundle the parent ResourceBundles will be searched
-until a matching key was found.
-If the key is not present in any of its parents a ``ResourceBundle.exceptions.NotInResourceBundleError`` will be raised.
+until a matching key was found, or it is determined that the key is not present in any parent ResourceBundle.
 
 ---
 
-### gettext
+#### Accessing the available key-value items in your code:
 
-The ResourceBundle module can convert ResourceBundle files to gettext pot / po files.
-This can be done by using the ``ResourceBundle.Converter.to_gettext()`` function.
+ResourceBundles can be converted into dict objects with ``dict(bundle)``.
+If you want to include the whole chain to get every accessible key and value, just iterate over the bundles parent.
 
 ```python
-from ResourceBundle import Converter
+import ResourceBundle
 
-# convert all .properties files in the current directory to .po files
-Converter.to_gettext(".", ".")
+bundle = ResourceBundle.get_bundle("Strings")
+
+everything = dict(bundle)
+while bundle.parent is not None:
+    bundle = bundle.parent
+    everything.update(dict(bundle))
 ```
-
-Note however that this step is obsolete if you are using gettext properly
-as this will include automatically extracting strings from your source code.
-The function is only intended as a head start to keep existing translations.

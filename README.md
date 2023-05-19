@@ -2,7 +2,7 @@
 
 [![PyPI-Versions](https://img.shields.io/pypi/pyversions/ResourceBundle)](https://pypi.org/project/ResourceBundle)
 [![PyPI version](https://badge.fury.io/py/ResourceBundle.svg)](https://pypi.org/project/ResourceBundle)
-[![License](https://img.shields.io/github/license/felix-zenk/onboardapis)](https://github.com/felix-zenk/onboardapis/blob/main/LICENSE)
+[![License](https://img.shields.io/github/license/felix-zenk/onboardapis)](https://github.com/felix-zenk/ResourceBundle/blob/main/LICENSE)
 
 
 ResourceBundle is a module that manages internationalization of string resources.
@@ -14,7 +14,7 @@ It is inspired by javas ResourceBundle and accepts the same format as a java Pro
 >
 > For information on how to do internationalization in python,
 > see the [official documentation](https://docs.python.org/3/library/gettext.html).
-> You can use the `ResourceBundle.Converter.to_gettext()` method to convert your ResourceBundle files to gettext po files.
+> You can use the [`ResourceBundle.Converter.to_gettext()`](#gettext) method to convert your ResourceBundle files to gettext po files.
 
 ---
 ### Installation

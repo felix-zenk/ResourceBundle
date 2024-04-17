@@ -1,19 +1,15 @@
 """
-Module containing the implementation of the ResourceBundle
+Module containing the implementation of the ResourceBundle.
 """
-from __future__ import annotations
-
 import codecs
 import re
+
 from datetime import datetime
 from os import PathLike, listdir
 from pathlib import Path
-from typing import Sequence, KeysView
+from typing import Sequence, KeysView, Optional
 
 from .exceptions import NotInResourceBundleError, MalformedResourceBundleError
-
-__version_info__ = (2, 1, 0)
-__version__ = ".".join(map(str, __version_info__))
 
 
 class _Parser(object):
@@ -125,13 +121,13 @@ class ResourceBundle(object):
         return f"{self._name}" if self._locale is None else f"{self._name}_{self._locale}"
 
     @property
-    def parent(self) -> ResourceBundle:
+    def parent(self) -> "ResourceBundle":
         """
         Get the ResourceBundles parent ResourceBundle
         """
         return self._parent
 
-    def _get_parent_bundle(self) -> ResourceBundle | None:
+    def _get_parent_bundle(self) -> Optional["ResourceBundle"]:
         # This is the root bundle
         if self._locale is None:
             return None
@@ -169,7 +165,7 @@ class ResourceBundle(object):
         """
         Return all keys present in this specific ResourceBundle
         """
-        return self._mapping.keys()
+        return self._mapping.keys()  # type: ignore
 
     def get(self, item: str, __default: str = None) -> str:
         """
@@ -232,7 +228,21 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\\n"
 "Generated-By: ResourceBundle {version}\\n"
 
-''' # from pygettext.py
+'''  # from pygettext.py
+
+
+def get_package_version() -> str:
+    import sys
+    if (3, 8) < sys.version_info:
+        from importlib_metadata import version
+        from importlib_metadata import PackageNotFoundError
+    else:
+        from importlib.metadata import version
+        from importlib.metadata import PackageNotFoundError
+    try:
+        return version("ResourceBundle")
+    except PackageNotFoundError:
+        return "unknown"
 
 
 class Converter:
@@ -265,12 +275,12 @@ class Converter:
 
             dst_file_path.parent.mkdir(parents=True, exist_ok=True)
             with open(dst_file_path, mode="w") as dst_fd:
-                dst_fd.write(_pot_header.format(time=datetime.now().strftime("%Y-%m-%d %H:%M%z"), version=__version__))
+                dst_fd.write(_pot_header.format(time=datetime.now().strftime("%Y-%m-%d %H:%M%z"), version=get_package_version()))  # noqa: E501
                 for key, value in dict(get_bundle(bundle_name, locale, path=src_path)).items():
                     dst_fd.write(f'msgid "{key}"\nmsgstr "{value.strip()}"\n\n')
                     msg_ids.add(key)
 
         with open(dst_path / "base.pot", mode="w") as f:
-            f.write(_pot_header.format(time=datetime.now().strftime("%Y-%m-%d %H:%M%z"), version=__version__))
+            f.write(_pot_header.format(time=datetime.now().strftime("%Y-%m-%d %H:%M%z"), version=get_package_version()))
             for msg_id in sorted(msg_ids):
                 f.write(f'msgid "{msg_id}"\nmsgstr ""\n\n')

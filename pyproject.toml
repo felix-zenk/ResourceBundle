@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ResourceBundle"
+description = "ResourceBundle is a module that manages internationalization of string resources."
+version = "2.2.0"
+requires-python = ">=3"
+readme = { file = "README.md", content-type = "text/markdown" }
+license = { text = "MIT" }
+authors = [
+    { name = "Felix Zenk", email = "felix.zenk@web.de" },
+]
+dependencies = [
+    "importlib_metadata; python_version < '3.8'",
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Utilities",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent"
+]
+
+[project.urls]
+Homepage = "https://github.com/felix-zenk/ResourceBundle"
+Documentation = "https://github.com/felix-zenk/ResourceBundle"
+Repository = "https://github.com/felix-zenk/ResourceBundle"
+Issues = "https://github.com/felix-zenk/ResourceBundle/issues"
+
+[tool.setuptools.packages.find]
+include = ["ResourceBundle*"]

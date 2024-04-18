@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ResourceBundle"
-description = "ResourceBundle is a module that manages internationalization of string resources."
+description = "ResourceBundle is a package that manages internationalization of string resources."
 version = "2.2.0"
 requires-python = ">=3.5"
 readme = { file = "README.md", content-type = "text/markdown" }

@@ -13,7 +13,7 @@ setuptools.setup(
     version=version,
     author='Felix Zenk',
     author_email='felix.zenk@web.de',
-    description="ResourceBundle is a module that manages internationalization of string resources.",
+    description="ResourceBundle is a package that manages internationalization of string resources.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/felix-zenk/ResourceBundle",

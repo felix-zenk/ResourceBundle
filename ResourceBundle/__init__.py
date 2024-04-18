@@ -101,11 +101,11 @@ class ResourceBundle(object):
             The path to the ResourceBundle .properties files
             (default: current working directory)
         """
-        self._name: str = bundle_name
-        self._locale: str | None = bundle_locale
-        self._path: Path = self._ensure_path(path)
-        self._parent: ResourceBundle | None = self._get_parent_bundle()
-        self._mapping: dict[str, str] = self._map()
+        self._name = bundle_name  # type: str
+        self._locale = bundle_locale  # type: Optional[str]
+        self._path = self._ensure_path(path)  # type: Path
+        self._parent = self._get_parent_bundle()  # type: Optional[ResourceBundle]
+        self._mapping = self._map()  # type: dict[str, str]
         # Save self in cache
         self.__cached_bundles[self.name] = self
 

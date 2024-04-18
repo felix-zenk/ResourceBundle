@@ -18,6 +18,12 @@ jobs:
             python-version: "3.4"
           - os: macos-latest
             python-version: "3.4"
+          - os: windows-latest
+            python-version: "3.4"
+          - os: windows-latest
+            python-version: "3.5"
+          - os: windows-latest
+            python-version: "3.6"
     steps:
       - name: Checkout code
         uses: actions/checkout@v4.1.2

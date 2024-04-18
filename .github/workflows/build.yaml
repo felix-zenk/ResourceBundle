@@ -11,7 +11,13 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
+        os: [ ubuntu-latest, windows-latest, macos-latest ]
         python-version: [ "3.0.x", "3.1.x", "3.2.x", "3.3.x", "3.4.x", "3.5.x", "3.6.x", "3.7.x", "3.8.x", "3.9.x", "3.10.x", "3.11.x", "3.12.x", "3.13.x" ]
+        exclude:
+          - os: ubuntu-latest
+            python-version: [ "3.0.x", "3.1.x", "3.2.x" ]
+          - os: macos-latest
+            python-version: [ "3.0.x", "3.1.x", "3.2.x", "3.3.x", "3.4.x" ]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4.1.2

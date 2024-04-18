@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "ResourceBundle"
 description = "ResourceBundle is a module that manages internationalization of string resources."
 version = "2.2.0"
-requires-python = ">=3"
+requires-python = ">=3.5"
 readme = { file = "README.md", content-type = "text/markdown" }
 license = { text = "MIT" }
 authors = [
@@ -17,11 +17,6 @@ dependencies = [
 ]
 classifiers = [
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.0",
-    "Programming Language :: Python :: 3.1",
-    "Programming Language :: Python :: 3.2",
-    "Programming Language :: Python :: 3.3",
-    "Programming Language :: Python :: 3.4",
     "Programming Language :: Python :: 3.5",
     "Programming Language :: Python :: 3.6",
     "Programming Language :: Python :: 3.7",

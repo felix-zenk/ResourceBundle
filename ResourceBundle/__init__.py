@@ -64,14 +64,16 @@ class _Parser(object):
                 key = key.strip()
                 value = '='.join(value).strip()
             else:
-                raise MalformedResourceBundleError(f"Malformed file: '{file_path}' (line {line_no})")
+                raise MalformedResourceBundleError("Malformed file: '%s' (line %d)" % (file_path, line_no))
 
             if '\\' in value:  # may contain escaped chars
                 value = decode(value)
             if key not in mapping.keys():
                 mapping[key] = value
             else:
-                raise MalformedResourceBundleError(f"Duplicate key '{key}' in file '{file_path}' on line {line_no}")
+                raise MalformedResourceBundleError(
+                    "Duplicate key '%s' in file '%s' on line %d" % (key, file_path, line_no)
+                )
         return mapping
 
 
@@ -108,7 +110,7 @@ class ResourceBundle(object):
         self.__cached_bundles[self.name] = self
 
     def __repr__(self) -> str:
-        return f"<{self.__class__.__name__} {self.name}>"
+        return "<%s %s>" % (self.__class__.__name__, self.name)
 
     def __str__(self) -> str:
         return self.name
@@ -118,7 +120,7 @@ class ResourceBundle(object):
         """
         Get the full name of the ResourceBundle
         """
-        return f"{self._name}" if self._locale is None else f"{self._name}_{self._locale}"
+        return self._name if self._locale is None else "%s_%s" % (self._name, self._locale)
 
     @property
     def parent(self) -> "ResourceBundle":
@@ -144,7 +146,7 @@ class ResourceBundle(object):
 
     def _map(self) -> dict[str, str]:
         try:
-            return _Parser.parse(self._path / f"{self.name}.properties")
+            return _Parser.parse(self._path / ("%s.properties" % self.name))
         except FileNotFoundError:
             return dict()
 
@@ -156,7 +158,7 @@ class ResourceBundle(object):
             return Path(path)
         if path is None:
             return Path()
-        raise TypeError(f"Path must be of type str or PathLike, not {type(path)}")
+        raise TypeError("Path must be of type str or PathLike, not %s" % type(path))
 
     def __getitem__(self, item) -> str:
         return self.get(item)
@@ -268,19 +270,19 @@ class Converter:
         for filename in resource_bundle_files:
             if '_' not in filename:
                 bundle_name, locale = (src_path / filename).stem, None
-                dst_file_path = dst_path / f"{bundle_name}_restored_default_values.po"
+                dst_file_path = dst_path / ("%s_restored_default_values.po" % bundle_name)
             else:
                 bundle_name, locale = (src_path / filename).stem.split("_", 1)
-                dst_file_path = dst_path / locale / "LC_MESSAGES" / f"{bundle_name}.po"
+                dst_file_path = dst_path / locale / "LC_MESSAGES" / ("%s.po" % bundle_name)
 
             dst_file_path.parent.mkdir(parents=True, exist_ok=True)
             with open(dst_file_path, mode="w") as dst_fd:
                 dst_fd.write(_pot_header.format(time=datetime.now().strftime("%Y-%m-%d %H:%M%z"), version=get_package_version()))  # noqa: E501
                 for key, value in dict(get_bundle(bundle_name, locale, path=src_path)).items():
-                    dst_fd.write(f'msgid "{key}"\nmsgstr "{value.strip()}"\n\n')
+                    dst_fd.write('msgid "%s"\nmsgstr "{value.strip()}"\n\n' % key)
                     msg_ids.add(key)
 
         with open(dst_path / "base.pot", mode="w") as f:
             f.write(_pot_header.format(time=datetime.now().strftime("%Y-%m-%d %H:%M%z"), version=get_package_version()))
             for msg_id in sorted(msg_ids):
-                f.write(f'msgid "{msg_id}"\nmsgstr ""\n\n')
+                f.write('msgid "%s"\nmsgstr ""\n\n' % msg_id)

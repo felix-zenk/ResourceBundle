@@ -20,4 +20,4 @@ class NotInResourceBundleError(ResourceBundleError):
         :param str bundle_name: The name of the ResourceBundle
         :param str key: The key that could not be found
         """
-        super(NotInResourceBundleError, self).__init__(f"Can't find key {key} in bundle {bundle_name}!")
+        super(NotInResourceBundleError, self).__init__("Can't find key %s in bundle %s!" % (key, bundle_name))

@@ -15,9 +15,9 @@ jobs:
         python-version: [ "3.5", "3.6", "3.7", "3.8", "3.9", "3.10", "3.11", "3.12", "3.13" ]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4.1.2
+        uses: actions/checkout@v4
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
           allow-prereleases: true
@@ -29,7 +29,7 @@ jobs:
         run: |
           if [[ "${{ matrix.python-version }}" =~ ^3\.[0-6]$ ]]; then
             echo "Legacy setup.py build"
-            python -m pip install setuptools
+            python -m pip install setuptools toml
             python setup.py install
           else
             echo "PEP 517 build"
@@ -49,7 +49,7 @@ jobs:
             python -m build
           ) else (
             echo "Legacy setup.py build"
-            python -m pip install setuptools
+            python -m pip install setuptools toml
             python setup.py install
           )
         if: runner.os == 'Windows'

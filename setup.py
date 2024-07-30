@@ -1,42 +1,33 @@
+import re
+
 import setuptools
+import toml
 
-with open("README.md", "r", encoding='utf-8') as fh:
-    long_description = fh.read()
+from pathlib import Path
 
-
-with open('pyproject.toml', mode='r', encoding='utf-8') as f:
-    version = f.read().split('version = ')[1].split('\n')[0].strip().replace('"', '')
-
+pyproject = toml.loads(Path('pyproject.toml').read_text(encoding='utf-8'))
+author = pyproject['project']['authors'][0]
 
 setuptools.setup(
-    name="ResourceBundle",
-    version=version,
-    author='Felix Zenk',
-    author_email='felix.zenk@web.de',
-    description="ResourceBundle is a package that manages internationalization of string resources.",
-    long_description=long_description,
-    long_description_content_type="text/markdown",
-    url="https://github.com/felix-zenk/ResourceBundle",
-    project_urls={
-        "Issues": "https://github.com/felix-zenk/ResourceBundle/issues",
-        "Repository": "https://github.com/felix-zenk/ResourceBundle",
-        "Documentation": "https://github.com/felix-zenk/ResourceBundle",
-    },
-    packages=setuptools.find_packages(".", include=["ResourceBundle*"]),
-    classifiers=[
-        "Programming Language :: Python :: 3",
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7',
-        'Programming Language :: Python :: 3.8',
-        'Programming Language :: Python :: 3.9',
-        'Programming Language :: Python :: 3.10',
-        'Programming Language :: Python :: 3.11',
-        'Programming Language :: Python :: 3.12',
-        'Programming Language :: Python :: 3.13',
-        'Topic :: Utilities',
-        "License :: OSI Approved :: MIT License",
-        "Operating System :: OS Independent"
+    name=pyproject['project']['name'],
+    description=pyproject['project']['description'],
+    version=pyproject['project']['version'],
+    author=author['name'],
+    author_email=author['email'],
+    license=pyproject['project']['license'],
+    long_description=Path(pyproject['project']['readme']['file']).read_text(encoding='utf-8'),
+    long_description_content_type=pyproject['project']['readme']['content-type'],
+    url=pyproject['project']['urls']['Homepage'],
+    project_urls={k: v for k, v in pyproject['project']['urls'].items() if k != 'Homepage'},
+    packages=setuptools.find_packages(
+        where=pyproject['tool']['setuptools']['packages']['find'].get('where', '.'),
+        include=pyproject['tool']['setuptools']['packages']['find']['include']
+    ),
+    requires=[
+        re.match(r'([\w-]+)', dependency).group(1)
+        for dependency in pyproject['project']['dependencies']
     ],
-    python_requires='>=3.5'
+    classifiers=pyproject['project']['classifiers'],
+    keywords=pyproject['project']['keywords'],
+    python_requires=pyproject['project']['requires-python'],
 )
